@@ -1,7 +1,7 @@
 package org.com.thang.model;
 
 import org.com.thang.model.mate.Table;
-
+import org.com.thang.model.mate.Foreign;
 @Table("sys_user_info")
 public class User extends Model<User>{
 
@@ -12,11 +12,15 @@ public class User extends Model<User>{
 	private String email;
 	private String birth;
 	private String sex;
-	private String deptId;
+	
+	@Foreign(foreignClass=Dept.class,foreignKey="id")
+	private Dept deptId;
 	private String opt;
 	private String createTime;
 	private String createPerson;
 	private String reference;
+	
+	
 	public String getId() {
 		return id;
 	}
@@ -59,10 +63,10 @@ public class User extends Model<User>{
 	public void setSex(String sex) {
 		this.sex = sex;
 	}
-	public String getDeptId() {
-		return deptId;
+	public Dept getDeptId() {
+		return deptId.select();
 	}
-	public void setDeptId(String deptId) {
+	public void setDeptId(Dept deptId) {
 		this.deptId = deptId;
 	}
 	public String getOpt() {
@@ -89,7 +93,5 @@ public class User extends Model<User>{
 	public void setReference(String reference) {
 		this.reference = reference;
 	}
-	
-	
 	
 }

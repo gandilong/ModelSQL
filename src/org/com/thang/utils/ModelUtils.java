@@ -14,7 +14,7 @@ public class ModelUtils {
 
 	public static Field getField(Class<?> modelClass,String fieldName){
 		Field field=null;
-		if(null!=modelClass&&StringUtils.isNotEmpty(fieldName)){
+		if(null!=modelClass&&StrUtils.isNotEmpty(fieldName)){
 			try{
 			    field=modelClass.getDeclaredField(fieldName);
 			}catch(Exception e){
@@ -72,7 +72,7 @@ public class ModelUtils {
 			StringProcessor processor=new StringProcessor(){
 
 				public String processor(String str) {
-					return StringUtils.addUnderline(str);
+					return StrUtils.addUnderline(str);
 				}
 			};
 			
@@ -143,7 +143,7 @@ public class ModelUtils {
 		    	i++;
 		    }
 		}
-		return StringUtils.join(names,"");
+		return StrUtils.join(names,"");
 	}
 	
 	public static String getColumnName(Class<?> model,String field){

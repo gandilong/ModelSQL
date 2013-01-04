@@ -1,20 +1,9 @@
 package org.com.thang.utils;
 
-public class StringUtils {
+import org.apache.commons.lang.StringUtils;
 
-	public static final StringBuffer sber=new StringBuffer();
-	
-	public static String join(String[] values,String link){
-		sber.delete(0, sber.length());
-		for(String value:values){
-            if(0!=sber.length()){
-            	sber.append(link);
-            }
-			sber.append(value);
-		}
-		return sber.toString();
-	}
-	
+public class StrUtils extends StringUtils{
+
 	/**
 	 * 判断字符串不为NULL
 	 * @param value
@@ -91,6 +80,15 @@ public class StringUtils {
 			}
 		}
 		return columnName;
+	}
+	
+	/**
+	 * 首字母大写
+	 * @param value
+	 * @return
+	 */
+	public static String upperHead(String value){
+		return capitalize(value);
 	}
 	
 }

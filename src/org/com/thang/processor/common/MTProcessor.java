@@ -2,7 +2,7 @@ package org.com.thang.processor.common;
 
 import org.com.thang.model.mate.Table;
 import org.com.thang.processor.ModelTableProcessor;
-import org.com.thang.utils.StringUtils;
+import org.com.thang.utils.StrUtils;
 
 /**
  * 从实体类到表的处理。
@@ -19,7 +19,7 @@ public class MTProcessor implements ModelTableProcessor {
 			if(model.isAnnotationPresent(org.com.thang.model.mate.Table.class)){
 				return model.getAnnotation(org.com.thang.model.mate.Table.class).value();
 			}
-			return StringUtils.addUnderline(model.getSimpleName());
+			return StrUtils.addUnderline(model.getSimpleName());
 		}
 		return null;
 	}

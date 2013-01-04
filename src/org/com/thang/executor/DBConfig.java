@@ -1,6 +1,5 @@
 package org.com.thang.executor;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -12,7 +11,6 @@ public class DBConfig {
 
 	private static Properties properties=null;
 	private static DataSource dataSource=null;
-	
 	
 	private DBConfig(){};
 	
@@ -43,6 +41,13 @@ public class DBConfig {
 			init();
 		}
 		return dataSource;
+	}
+	
+	public static String getDatabase(){
+		if(null==properties){
+			init();
+		}
+		return properties.getProperty("database");
 	}
 	
 	
