@@ -97,7 +97,9 @@ DocProject/Help/html
 publish
 
 # Others
-[Bb]in
+#[Bb]in
+#classes
+*.class
 [Oo]bj
 sql
 TestResults
