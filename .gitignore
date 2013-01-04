@@ -5,7 +5,8 @@
 *.pydevproject
 #.project
 #.metadata
-bin/classes/*.class
+#bin/classes/*.class
+*.class
 tmp/
 *.tmp
 *.bak
