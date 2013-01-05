@@ -4,6 +4,13 @@ import org.apache.commons.lang.StringUtils;
 
 public class StrUtils extends StringUtils{
 
+	private static String temp=null;
+	
+	public static String out(Object obj){
+		System.out.println(temp=String.valueOf(obj.toString()));
+		return temp;
+	}
+	
 	/**
 	 * 判断字符串不为NULL
 	 * @param value
@@ -79,7 +86,7 @@ public class StrUtils extends StringUtils{
 				columnName+=tnames[i];
 			}
 		}
-		return columnName;
+		return columnName.toLowerCase();
 	}
 	
 	/**

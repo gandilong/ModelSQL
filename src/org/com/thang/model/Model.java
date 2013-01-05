@@ -17,13 +17,13 @@ public class Model<T> {
 
 	private SQL sql=null;
 	private Class<?> modelClass=null;
-	private QueryRunner queryRunner=new QueryRunner();
+	private static QueryRunner queryRunner=new QueryRunner();
+	private BeanHandler<T> beanHandler=new BeanHandler<T>((Class<T>)(this.getClass()),FCProcessor.getInstance());
+	private BeanListHandler<T> beanListHandler=new BeanListHandler<T>((Class<T>)this.getClass(),FCProcessor.getInstance());
 	
 	public T select(){
 		T bean=null;
-		
 		try{
-			System.out.println("====="+ModelUtils.getFiledType(this.getClass(), "id"));
 		    switch(ModelUtils.getFiledType(this.getClass(), "id")){
 		        case 0: bean=this.select(String.valueOf(BeanUtils.getProperty(this, "id")));break;
 		        case 1: bean=this.select(Long.valueOf(BeanUtils.getProperty(this, "id")));break;
@@ -33,55 +33,76 @@ public class Model<T> {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
 		return bean;
 	}
 	
-	@SuppressWarnings("unchecked")
+	/**
+	 * 根据ID查询一条记录。
+	 * @param id
+	 * @return
+	 */
 	public T select(long id){
 		T bean=null;
 		modelClass=this.getClass();
 		sql=SQLGener.getSelectSQL(modelClass).select(id);
 		try{
-			bean=queryRunner.query(DBConfig.getConnection(),sql.toString(), new BeanHandler<T>((Class<T>)modelClass,FCProcessor.getInstance()));
+			bean=queryRunner.query(DBConfig.getConnection(),sql.toString(), beanHandler);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return bean;
 	}
 	
-	@SuppressWarnings("unchecked")
+	/**
+	 * 根据ID查询一条记录。
+	 * @param id
+	 * @return
+	 */
 	public T select(String id){
 		T bean=null;
 		modelClass=this.getClass();
 		sql=SQLGener.getSelectSQL(modelClass).select(id);
 		try{
-			bean=queryRunner.query(DBConfig.getConnection(),sql.toString(), new BeanHandler<T>((Class<T>)modelClass,FCProcessor.getInstance()));
+			bean=queryRunner.query(DBConfig.getConnection(),sql.toString(), beanHandler);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return bean;
 	}
 	
-	@SuppressWarnings("unchecked")
+	/**
+	 * 查询所有数据。
+	 * @return
+	 */
 	public List<T> list(){
 		List<T> data=null;
 		modelClass=this.getClass();
 		sql=SQLGener.getSelectSQL(modelClass).select(false);
 		try{
-			data=queryRunner.query(DBConfig.getConnection(),sql.toString(), new BeanListHandler<T>((Class<T>)modelClass,FCProcessor.getInstance()));
+			data=queryRunner.query(DBConfig.getConnection(),sql.toString(), beanListHandler);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return data;
 	}
 	
+	/**
+	 * 以分页的形式询数据。
+	 * @param pageNow
+	 * @param pageSize
+	 * @return
+	 */
 	public List<T> page(long pageNow,long pageSize){
 		List<T> data=null;
 		sql.value("page", new Page(pageNow,pageSize));
 		return data;
 	}
 	
+	/**
+	 * 以分页的形式询数据。
+	 * @param page
+	 * @return
+	 */
 	public List<T> page(Page page){
         List<T> data=null;
 		

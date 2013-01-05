@@ -2,6 +2,7 @@ package org.com.thang;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.util.List;
 
 import javax.management.Descriptor;
 
@@ -11,6 +12,7 @@ import org.com.thang.gener.sql.SelectSQLGener;
 import org.com.thang.model.Dept;
 import org.com.thang.model.Person;
 import org.com.thang.model.User;
+import org.com.thang.utils.QueryUtils;
 
 public class Test {
 
@@ -20,16 +22,12 @@ public class Test {
 	public static void main(String[] args) {
         //SelectSQLGener select =new SelectSQLGener(Person.class);
 		long s=System.currentTimeMillis();
-       User u=new User().select("9972340c-b9c4-4e43-b952-b6026a737e66");
-       //u=u.select("9972340c-b9c4-4e43-b952-b6026a737e66");
-       System.out.println(u.getId());
-       System.out.println(u.getUserName());
-       System.out.println(u.getLoginName());
-       Dept d=u.getDeptId();
-       System.out.println(d);
-       User user=d.getUser();
-       System.out.println(u);
-       System.out.println(System.currentTimeMillis()-s);
+        List<User> users=(List<User>)QueryUtils.query(User.class);//new User().list();
+        for(User u:users){
+        	System.out.println(u.getUserName());
+        }
+        User u=new User().select("f0a18a76-eaa0-4a37-ad42-36fc35910fad");
+       //System.out.println(System.currentTimeMillis()-s);
        //u.delete();
 		//System.out.println(DBConfig.class.getResource("").getPath());
 		//System.out.println(System.getProperty("user.dir"));
