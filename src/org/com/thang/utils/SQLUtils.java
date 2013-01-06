@@ -3,17 +3,34 @@ package org.com.thang.utils;
 
 import java.lang.reflect.Field;
 
+import org.com.thang.db.sql.SQL;
 import org.com.thang.db.sql.SelectSQL;
-import org.com.thang.model.ActionValues;
+import org.com.thang.db.sql.WhereSQL;
+import org.com.thang.executor.DBConfig;
 import org.com.thang.model.Page;
 import org.com.thang.model.mate.Order;
-import org.com.thang.processor.SQLProcessor;
 
-public class SQLUtils implements SQLProcessor{
+public class SQLUtils {
 
-	public String process(Class<?> model, StringBuffer sql, ActionValues values) {
-		
-		return null;
+	public static void process(boolean pages,Class<?> modelClass, SQL sql) {
+		if(!sql.values().isEmpty()){
+			String[] fieldNames=ModelUtils.getFieldNames(modelClass);
+			WhereSQL where=sql.where(null);
+			for(String fieldName:fieldNames){
+				if(null!=sql.value(fieldName)&&StrUtils.isNotEmpty(String.valueOf(sql.value(fieldName)))){
+					where.field(fieldName, sql.value(fieldName));
+				}
+			}
+		    if(pages){
+			    if("mysql".equalsIgnoreCase(DBConfig.getDatabase())){
+				    SQLUtils.pageProcessMySQL((SelectSQL)sql,(Page)sql.value("page"));
+			    }else if("oracle".equalsIgnoreCase(DBConfig.getDatabase())){
+				    SQLUtils.pageProcessOracle((SelectSQL)sql,(Page)sql.value("page"));
+			    }
+		    }else{
+			    SQLUtils.orderProcess((SelectSQL)sql,sql.getModel());	
+		    }
+		}
 	}
 	
 	public static void pageProcessOracle(SelectSQL sql,Page page){
@@ -37,7 +54,7 @@ public class SQLUtils implements SQLProcessor{
     	for(Field field:fields){
     		if(field.isAnnotationPresent(org.com.thang.model.mate.Order.class)){
     			Order order=field.getAnnotation(org.com.thang.model.mate.Order.class);
-    			sql.append(" order by ");
+    			sql.append(" \n order by ");
     			sql.append(field.getName());
     			sql.append(" ");
     			sql.append(order.order());

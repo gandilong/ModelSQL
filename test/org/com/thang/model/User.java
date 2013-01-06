@@ -1,8 +1,14 @@
 package org.com.thang.model;
 
+import java.util.List;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.com.thang.executor.DBConfig;
+import org.com.thang.gener.sql.SQLGener;
 import org.com.thang.model.mate.Order;
 import org.com.thang.model.mate.Table;
 import org.com.thang.model.mate.Foreign;
+import org.com.thang.utils.StrUtils;
 @Table("sys_user_info")
 public class User extends Model<User>{
 
@@ -66,7 +72,7 @@ public class User extends Model<User>{
 		this.sex = sex;
 	}
 	public Dept getDept() {
-		return dept.select();
+		return dept;
 	}
 	public void setDept(Dept dept) {
 		this.dept = dept;

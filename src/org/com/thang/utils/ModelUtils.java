@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import org.apache.commons.beanutils.BeanUtils;
 import org.com.thang.model.ActionValues;
 import org.com.thang.model.Person;
+import org.com.thang.model.sql.Link;
 import org.com.thang.processor.StringProcessor;
 import org.com.thang.processor.common.FCProcessor;
 import org.com.thang.processor.common.FCTProcessor;
@@ -40,6 +41,16 @@ public class ModelUtils {
 			}
 		}
 		return num;
+	}
+	
+	public static int getSQLMate(Class<?> modelClass,String fieldName){
+		Field field=ModelUtils.getField(modelClass, fieldName);
+		System.out.println(modelClass+"====="+fieldName);
+		if(field.isAnnotationPresent(org.com.thang.model.mate.SQLMate.class)){
+			return field.getAnnotation(org.com.thang.model.mate.SQLMate.class).Mate().value();
+		}else{
+			return Link.EQUAL.value();
+		}
 	}
 	
 	/**

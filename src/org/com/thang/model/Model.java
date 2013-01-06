@@ -12,24 +12,32 @@ import org.com.thang.executor.DBConfig;
 import org.com.thang.gener.sql.SQLGener;
 import org.com.thang.processor.common.FCProcessor;
 import org.com.thang.utils.ModelUtils;
-
+import org.com.thang.utils.SQLUtils;
+@SuppressWarnings("unchecked")
 public class Model<T> {
 
 	private SQL sql=null;
 	private Class<?> modelClass=null;
-	private static QueryRunner queryRunner=new QueryRunner();
-	private BeanHandler<T> beanHandler=new BeanHandler<T>((Class<T>)(this.getClass()),FCProcessor.getInstance());
-	private BeanListHandler<T> beanListHandler=new BeanListHandler<T>((Class<T>)this.getClass(),FCProcessor.getInstance());
+	protected static QueryRunner queryRunner=new QueryRunner(DBConfig.getDataSource());
+	protected BeanHandler<T> beanHandler=new BeanHandler<T>((Class<T>)(this.getClass()),FCProcessor.getInstance());
+	protected BeanListHandler<T> beanListHandler=new BeanListHandler<T>((Class<T>)this.getClass(),FCProcessor.getInstance());
 	
 	public T select(){
 		T bean=null;
 		try{
-		    switch(ModelUtils.getFiledType(this.getClass(), "id")){
-		        case 0: bean=this.select(String.valueOf(BeanUtils.getProperty(this, "id")));break;
-		        case 1: bean=this.select(Long.valueOf(BeanUtils.getProperty(this, "id")));break;
-		        case 2: bean=this.select(Long.valueOf(BeanUtils.getProperty(this, "id")));break;
-		        default :break;
-		    }
+			if(null!=BeanUtils.getProperty(this, "id")){
+		        switch(ModelUtils.getFiledType(this.getClass(), "id")){
+		            case 0: bean=this.select(String.valueOf(BeanUtils.getProperty(this, "id")));break;
+		            case 1: bean=this.select(Long.valueOf(BeanUtils.getProperty(this, "id")));break;
+		            case 2: bean=this.select(Long.valueOf(BeanUtils.getProperty(this, "id")));break;
+		            default :break;
+		        }
+			}else{
+				sql=SQLGener.getSelectSQL(this.getClass()).select(false);
+				sql.values(ActionValues.copyFromObject(this));
+				SQLUtils.process(false,sql.getModel(), sql);
+				bean=queryRunner.query(sql.toString(), beanHandler);
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -46,7 +54,7 @@ public class Model<T> {
 		modelClass=this.getClass();
 		sql=SQLGener.getSelectSQL(modelClass).select(id);
 		try{
-			bean=queryRunner.query(DBConfig.getConnection(),sql.toString(), beanHandler);
+			bean=queryRunner.query(sql.toString(), beanHandler);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -63,7 +71,7 @@ public class Model<T> {
 		modelClass=this.getClass();
 		sql=SQLGener.getSelectSQL(modelClass).select(id);
 		try{
-			bean=queryRunner.query(DBConfig.getConnection(),sql.toString(), beanHandler);
+			bean=queryRunner.query(sql.toString(), beanHandler);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -71,15 +79,34 @@ public class Model<T> {
 	}
 	
 	/**
-	 * 查询所有数据。
+	 * 查询对象条件查询所有数据。
 	 * @return
 	 */
 	public List<T> list(){
 		List<T> data=null;
 		modelClass=this.getClass();
 		sql=SQLGener.getSelectSQL(modelClass).select(false);
+		sql.values(ActionValues.copyFromObject(this));
 		try{
-			data=queryRunner.query(DBConfig.getConnection(),sql.toString(), beanListHandler);
+			data=queryRunner.query(sql.toString(), beanListHandler);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return data;
+	}
+	
+	/**
+	 * 指定要查询的列，用属性名字符串形式做参数。
+	 * @param selector
+	 * @return
+	 */
+	public List<T> list(String ...selector){
+		List<T> data=null;
+		modelClass=this.getClass();
+		sql=SQLGener.getSelectSQL(modelClass).select(false,selector);
+		sql.values(ActionValues.copyFromObject(this));
+		try{
+			data=queryRunner.query(sql.toString(), beanListHandler);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -94,7 +121,15 @@ public class Model<T> {
 	 */
 	public List<T> page(long pageNow,long pageSize){
 		List<T> data=null;
+		modelClass=this.getClass();
+		sql=SQLGener.getSelectSQL(modelClass).select(false);
+		sql.values(ActionValues.copyFromObject(this));
 		sql.value("page", new Page(pageNow,pageSize));
+		try{
+			data=queryRunner.query(sql.toString(), beanListHandler);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return data;
 	}
 	
@@ -104,18 +139,17 @@ public class Model<T> {
 	 * @return
 	 */
 	public List<T> page(Page page){
-        List<T> data=null;
-		
+		List<T> data=null;
+		modelClass=this.getClass();
+		sql=SQLGener.getSelectSQL(modelClass).select(false);
+		sql.values(ActionValues.copyFromObject(this));
+		sql.value("page", page);
+		try{
+			data=queryRunner.query(sql.toString(), beanListHandler);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return data;
-	}
-	
-	/**
-	 * 指定要查询的列，用属性名字符串形式做参数。
-	 * @param selector
-	 * @return
-	 */
-	public List<T> select(String ...selector){
-		return null;
 	}
 	
 	public boolean delete(){
@@ -144,5 +178,24 @@ public class Model<T> {
 		return false;
 	}
 	
+	@Override
+	public String toString() {
+		try{
+		    if(null!=this){
+			    Field[] fields=this.getClass().getDeclaredFields();
+			    for(Field field:fields){
+				    if(field.isAnnotationPresent(org.com.thang.model.mate.Column.class)){
+					    if(field.getAnnotation(org.com.thang.model.mate.Column.class).primaryKey()){
+						    return BeanUtils.getProperty(this, field.getName());
+					    }
+				    }
+			    }
+			    return BeanUtils.getProperty(this, "id");
+		    }
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 }

@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
 
+	public boolean primaryKey() default false;
+	
 	public String column() default ""; 
 	
 	public String type() default "varchar(36)";

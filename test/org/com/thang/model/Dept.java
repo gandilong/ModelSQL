@@ -1,7 +1,11 @@
 package org.com.thang.model;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.apache.commons.beanutils.BeanUtils;
 import org.com.thang.model.mate.Foreign;
 import org.com.thang.model.mate.Table;
+import org.com.thang.utils.StrUtils;
 
 @Table("sys_dept_info")
 public class Dept extends Model<Dept>{
@@ -25,8 +29,8 @@ public class Dept extends Model<Dept>{
 	public void setDeptName(String deptName) {
 		this.deptName = deptName;
 	}
-	public User getUser() {
-		return user.select();
+	public User getUser()  {
+		return user;
 	}
 	public void setUser(User user) {
 		this.user = user;
