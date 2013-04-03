@@ -18,13 +18,15 @@ public class Test {
         	//System.out.println(u.getUserName());
         //}
         User u=new User();
+        u.setId("1110");
         u.setUserName("aaa");
        
         u.select();
        
        Dept d=new Dept();
        d.setUser(u);
-	       try {
+       
+	    try {
 			System.out.println(BeanUtils.getProperty(d, "user"));
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
