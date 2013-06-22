@@ -1,34 +1,47 @@
 package com.thang.model;
 
+import com.thang.executor.DBExecutor;
+
 public class Page {
 	private long pageNum=0;//总页数
 	private long pageNow=1;//当前页数
 	private long pageSize=15;//每页多少条数据
+	private long total=0;//总条数
 	
-	private String orderBy="id";
-	private String order="desc";
+	private Class<?> model=null;
 	
-	private boolean page=false;
+	private static DBExecutor dbe=new DBExecutor();
 	
-	public static final Page defaultPage=new Page();
-
-	public Page(){};
+	public Page(Class<?> model){
+		this.model=model;
+		init();
+	};
 	
-	public Page(boolean toPage){page=toPage;};
-	
-	public Page(long pageNow, long pageSize) {
+	public Page(long pageNow,Class<?> model) {
 		this.pageNow = pageNow;
-		this.pageSize = pageSize;
+		this.model=model;
+		init();
 	}
 	
-	public Page(long pageNow, long pageSize, String orderBy,String order) {
+	public Page(long pageNow, long pageSize,Class<?> model) {
 		this.pageNow = pageNow;
 		this.pageSize = pageSize;
-		this.orderBy = orderBy;
-		this.order = order;
+		this.model=model;
+		init();
+	}
+	
+	
+	public void init(){
+		if(null!=model){
+		    total=dbe.num(model);
+		    pageNum=(total/pageSize)+(total%pageSize==0?0:1);
+		}
 	}
 
 	public long getPageNow() {
+		if(pageNow>=pageNum){
+			pageNow=pageNum;
+		}
 		return pageNow;
 	}
 	public void setPageNow(long pageNow) {
@@ -49,25 +62,14 @@ public class Page {
 	public void setPageSize(long pageSize) {
 		this.pageSize = pageSize;
 	}
-	public String getOrderBy() {
-		return orderBy;
-	}
-	public void setOrderBy(String orderBy) {
-		this.orderBy = orderBy;
-	}
-	public String getOrder() {
-		return order;
-	}
-	public void setOrder(String order) {
-		this.order = order;
+
+	public long getTotal() {
+		return total;
 	}
 
-	public boolean isPage() {
-		return page;
+	public void setTotal(long total) {
+		this.total = total;
 	}
-
-	public void setPage(boolean page) {
-		this.page = page;
-	}
+    
 	
 }

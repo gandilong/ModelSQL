@@ -7,11 +7,13 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.thang.db.DBPools;
 import com.thang.model.Condition;
-import com.thang.model.SQLModel;
+import com.thang.model.Model;
 import com.thang.model.sql.SQLGener;
+import com.thang.processor.ModelProcessor;
 import com.thang.utils.reflect.ModelUtils;
 
 public class DBExecutor {
@@ -20,23 +22,27 @@ public class DBExecutor {
 	private static QueryRunner queryRunner=new QueryRunner(dataSource);
 	
 	public DBExecutor(){}
+
 	
-/*	public DBExecutor(DataSource dataSource){
-		dbm=new DBModel();
-		this.dataSource=dataSource;
-		this.queryRunner=new QueryRunner(dataSource);
-	}*/
-	
+	public long num(Class<?> model){
+		long total=0;
+		try{
+		    total=queryRunner.query("select count(*) from "+ModelUtils.getTableName(model),new ScalarHandler<Long>());
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return total;
+	}
 	/**
 	 * 增加一条数据记录，如果ID为空，则根据ID类型自增ID。
 	 * @param pojo
 	 */
-	public void insert(Object pojo){
+	public void insert(Object pojo,boolean generId){
 		try{
-		    if(!ModelUtils.idValid(pojo)){//假如实体ID值有效，则不自增，不然自增一个ID值。
+		    if(generId&&!ModelUtils.idValid(pojo)){//假如实体ID值有效，则不自增，不然自增一个ID值。
 		    	ModelUtils.installID(pojo);
 		    }
-		    queryRunner.update(SQLGener.InsertSQL(new SQLModel(pojo.getClass(),pojo)));
+		    queryRunner.update(SQLGener.InsertSQL(new Model(pojo)));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -49,7 +55,7 @@ public class DBExecutor {
 	public void delete(Class<?> model,long id){
 		if(0!=id){
 			try{
-				queryRunner.update(SQLGener.DeleteSQL(new SQLModel(model,id)));
+				queryRunner.update(SQLGener.DeleteSQL(new Model(model,id)));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -65,11 +71,41 @@ public class DBExecutor {
 	public void delete(Class<?> model,String id){
 		if(null!=id&&!"".equals(id)){
 			try{
-				queryRunner.update(SQLGener.DeleteSQL(new SQLModel(model,id)));
+				queryRunner.update(SQLGener.DeleteSQL(new Model(model,id)));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public  <T>List<T> list(Class<T> cls){//default is id desc
+		 List<T> result=null;
+		 try{
+		   	result=(List<T>)queryRunner.query(SQLGener.SelectSQL(new Model(cls)),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		 }catch(Exception e){
+		 	e.printStackTrace();
+		 }
+		 return result;
+	}
+	
+	public <T>List<T> listDesc(Class<T> cls,String columns){
+		List<T> result=null;
+		 try{
+		   	result=(List<T>)queryRunner.query(SQLGener.SelectDescSQL(new Model(cls),columns),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		 }catch(Exception e){
+		 	e.printStackTrace();
+		 }
+		 return result;
+	}
+	
+	public <T>List<T> listAsc(Class<T> cls,String columns){
+		List<T> result=null;
+		 try{
+		   	result=(List<T>)queryRunner.query(SQLGener.SelectAscSQL(new Model(cls),columns),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		 }catch(Exception e){
+		 	e.printStackTrace();
+		 }
+		 return result;
 	}
 	
 	/**
@@ -80,7 +116,7 @@ public class DBExecutor {
 	public <T>List<T> list(Class<T> cls,Condition condition){
 	    List<T> result=null;
 	    try{
-	    	result=(List<T>)queryRunner.query(SQLGener.SelectSQL(new SQLModel(cls,condition)),new BeanListHandler<T>(cls));
+	    	result=(List<T>)queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -104,7 +140,7 @@ public class DBExecutor {
 	public <T>T get(Class<T> cls,String id){
 		T result=null;
 		try{
-			result=queryRunner.query(SQLGener.SimpleSelectSQL(new SQLModel(cls,id)), new BeanHandler<T>(cls));
+			result=queryRunner.query(SQLGener.SimpleSelectSQL(new Model(cls,id)), new BeanHandler<T>(cls,ModelProcessor.getInstance()));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -118,7 +154,7 @@ public class DBExecutor {
 	public void update(Object pojo){
 		try{
 		    if(ModelUtils.idValid(pojo)){//实体ID值必须有效
-		    	queryRunner.update(SQLGener.UpdateSQL(new SQLModel(pojo.getClass(),pojo)));
+		    	queryRunner.update(SQLGener.UpdateSQL(new Model(pojo)));
 		    }else{
 		    	System.out.println("无效ID！");
 		    }

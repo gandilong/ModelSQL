@@ -15,7 +15,7 @@ public class Test {
 		User u=new User();
 		//DbUtils.loadDriver("com.mysql.jdbc.Driver");
 		u.setId(1);
-		u.setUname("gandilong");
+		u.setUserName("good");
 		
 		
 		/*

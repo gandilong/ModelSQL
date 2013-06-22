@@ -22,6 +22,18 @@ public class Model extends ArrayList<MField> {
 		loadModel(cls);
 	}
 	
+	public Model(Class<?> cls,long id){
+		this.id=String.valueOf(id);
+		loadModel(cls);
+		setId(this.id);
+	}
+	
+	public Model(Class<?> cls,String id){
+		this.id=id;
+		loadModel(cls);
+		setId(this.id);
+	}
+	
 	public Model(Object obj){
 		load(obj);
 	}
@@ -161,5 +173,6 @@ public class Model extends ArrayList<MField> {
 		}
 		return columnNames;
 	}
+
 	
 }

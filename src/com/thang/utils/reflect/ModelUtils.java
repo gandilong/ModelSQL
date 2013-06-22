@@ -16,12 +16,17 @@ public class ModelUtils {
 	 */
 	@SuppressWarnings("all")
 	public static Object getProperty(Object model,String fieldName){
+		Object value=null;
 		try{
-		    return model.getClass().getDeclaredMethod("get"+StringUtils.headUpper(fieldName),null).invoke(model, null);
+		    value=model.getClass().getDeclaredMethod("get"+StringUtils.headUpper(fieldName),null).invoke(model, null);
+		    if(null==value){
+		    	return "";
+		    }
+		    return value;
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return null;
+		return value==null?"":value;
 	}
 	
 	/**

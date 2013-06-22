@@ -5,7 +5,7 @@ public class MField {
 	private String fieldName=null;
 	private String columnName=null;
 	private int fieldType=0;//0代表字符串类型,1代表数字类型，
-	private String fieldValue=null;
+	private String fieldValue="";
 	private Class<?> foreignKey=null;
 	private boolean orderBy=false;
 	

@@ -5,26 +5,26 @@ import com.thang.utils.reflect.ModelUtils;
 
 public class Condition {
 
-	private Page page;
+	private Page page=null;
 	private Class<?> model;
+	private StringBuilder sber;
 	private StringBuilder cdtion;
-	private StringBuilder sber=null;
 	private boolean hasCondition=false;
 	
+	private String orderBy="ID";
+	private String order="DESC";
+	
 	public Condition(Class<?> cls){
-		page=new Page();
 		model=cls;
 		cdtion=new StringBuilder();
 	}
 	
 	public Condition(Class<?> cls,boolean toPage){
-		page=new Page(toPage);
+		if(toPage){
+			page=new Page(cls);	
+		}
 		model=cls;
 		cdtion=new StringBuilder();
-	}
-	
-	public Page getPage() {
-		return page;
 	}
 	
 	public void addCondition(String fieldName,Link link,String fieldValue){
@@ -104,10 +104,6 @@ public class Condition {
 		return this;
 	}
 
-/*	public void in(String fieldName, SelectSQL select) {
-		addCondition(fieldName,Link.IN,select.toString());
-	}*/
-
 	public void notIn(String fieldName, String[] fieldValues) throws SecurityException, NoSuchFieldException {
 		addCondition(fieldName,Link.NOT_IN,join(fieldValues,ModelUtils.isNumber(model.getDeclaredField(fieldName))));
 	}
@@ -137,15 +133,49 @@ public class Condition {
 	}
 
 	public StringBuilder getCdtion() {
+		
+		if(cdtion.length()==0){
+			cdtion.append(" 1=1 ");
+		}
+		
+		cdtion.append(" \nORDER BY ");
+		cdtion.append(getOrderBy());
+		cdtion.append(" ");
+		cdtion.append(getOrder());
+		cdtion.append(" ");
+		
+		if(null!=page){
+			cdtion.append(" LIMIT ");
+			cdtion.append(page.getPageNow()==1?0:(page.getPageNow()-1)*page.getPageSize());
+			cdtion.append(",");
+			cdtion.append(page.getPageNow()*page.getPageSize());
+		}
+		
 		return cdtion;
 	}
 
-	public void setCdtion(StringBuilder cdtion) {
-		this.cdtion = cdtion;
+	private String getOrderBy() {
+		return orderBy;
+	}
+	public Condition setOrderBy(String orderBy) {
+		this.orderBy = orderBy;
+		return this;
+	}
+	private String getOrder() {
+		return order;
+	}
+	public Condition setOrder(String order) {
+		this.order = order;
+		return this;
 	}
 
 	public void setPage(Page page) {
 		this.page = page;
 	}
+	
+	public Page getPage() {
+		return page;
+	}
+
 	
 }
