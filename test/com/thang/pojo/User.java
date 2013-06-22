@@ -6,30 +6,22 @@ import com.thang.model.mate.Table;
 @Table("sys_user_info")
 public class User {
 
-	private String id;
+	private long id;
+	
 	@Column("user_name")
 	private String uname;
-	@Column("type")
-	private long type;
 	
-	public String getId() {
+	public long getId() {
 		return id;
 	}
-	public void setId(String id) {
+	public void setId(long id) {
 		this.id = id;
 	}
-	
 	public String getUname() {
 		return uname;
 	}
 	public void setUname(String uname) {
 		this.uname = uname;
-	}
-	public long getType() {
-		return type;
-	}
-	public void setType(long type) {
-		this.type = type;
 	}
 	
 }

@@ -1,24 +1,31 @@
 package com.thang;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
+
+import java.util.Date;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.thang.executor.DBExecutor;
+import com.thang.pojo.User;
+
 public class DBETest {
 
+    private DBExecutor dbe=null;	
+	
 	@Before
 	public void setUp() throws Exception {
-	}
-
-	@Test
-	public void testDBExecutor() {
-		fail("Not yet implemented");
+		dbe=new DBExecutor();
 	}
 
 	@Test
 	public void testInsert() {
-		fail("Not yet implemented");
+		User user=new User();
+		user.setId(new Date().getTime());
+		user.setUname("good");
+		dbe.insert(user);
 	}
 
 	@Test
@@ -33,7 +40,11 @@ public class DBETest {
 
 	@Test
 	public void testList() {
-		fail("Not yet implemented");
+		List<User> users=dbe.list(User.class,null);
+		for(User u:users){
+			System.out.println(u.getUname());	
+		}
+		
 	}
 
 	@Test

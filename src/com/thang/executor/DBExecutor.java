@@ -5,17 +5,17 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 
 import com.thang.db.DBPools;
 import com.thang.model.Condition;
-import com.thang.model.DBModel;
-import com.thang.processor.ModelHandler;
-import com.thang.processor.ModelListHandler;
+import com.thang.model.SQLModel;
+import com.thang.model.sql.SQLGener;
 import com.thang.utils.reflect.ModelUtils;
 
 public class DBExecutor {
 
-	private static DBModel dbm=new DBModel();
 	private static DataSource dataSource=DBPools.getDataSource();
 	private static QueryRunner queryRunner=new QueryRunner(dataSource);
 	
@@ -33,10 +33,10 @@ public class DBExecutor {
 	 */
 	public void insert(Object pojo){
 		try{
-		    if(ModelUtils.idValid(pojo)){//假如实体ID值有效，则不自增，不然自增一个ID值。
+		    if(!ModelUtils.idValid(pojo)){//假如实体ID值有效，则不自增，不然自增一个ID值。
 		    	ModelUtils.installID(pojo);
 		    }
-	    	queryRunner.update(dbm.getInsertSQL(pojo));
+		    queryRunner.update(SQLGener.InsertSQL(new SQLModel(pojo.getClass(),pojo)));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -49,7 +49,7 @@ public class DBExecutor {
 	public void delete(Class<?> model,long id){
 		if(0!=id){
 			try{
-				queryRunner.update(dbm.getDeleteSQL(model,String.valueOf(id)));
+				queryRunner.update(SQLGener.DeleteSQL(new SQLModel(model,id)));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -65,7 +65,7 @@ public class DBExecutor {
 	public void delete(Class<?> model,String id){
 		if(null!=id&&!"".equals(id)){
 			try{
-				queryRunner.update(dbm.getDeleteSQL(model,id));
+				queryRunner.update(SQLGener.DeleteSQL(new SQLModel(model,id)));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -77,11 +77,10 @@ public class DBExecutor {
 	 * @param page
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T>List<T> list(Class<T> cls,Condition condition){
 	    List<T> result=null;
 	    try{
-			result=(List<T>)queryRunner.queryModel(dbm.getSelectSQL(cls,condition),ModelListHandler.getInstance(),cls);
+	    	result=(List<T>)queryRunner.query(SQLGener.SelectSQL(new SQLModel(cls,condition)),new BeanListHandler<T>(cls));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -102,11 +101,10 @@ public class DBExecutor {
 	 * @param id
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T>T get(Class<T> cls,String id){
 		T result=null;
 		try{
-			result=queryRunner.queryModel(dbm.getSelectSQL(cls, id), (ModelHandler<T>)ModelHandler.getInstance(),cls);
+			result=queryRunner.query(SQLGener.SimpleSelectSQL(new SQLModel(cls,id)), new BeanHandler<T>(cls));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -119,8 +117,8 @@ public class DBExecutor {
 	 */
 	public void update(Object pojo){
 		try{
-		    if(ModelUtils.idValid(pojo)){//假如实体ID值有效，则不自增，不然自增一个ID值。
-		    	queryRunner.update(dbm.getUpdateSQL(pojo));
+		    if(ModelUtils.idValid(pojo)){//实体ID值必须有效
+		    	queryRunner.update(SQLGener.UpdateSQL(new SQLModel(pojo.getClass(),pojo)));
 		    }else{
 		    	System.out.println("无效ID！");
 		    }

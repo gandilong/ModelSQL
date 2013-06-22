@@ -14,6 +14,7 @@ public class ModelUtils {
 	 * @param fieldName
 	 * @return
 	 */
+	@SuppressWarnings("all")
 	public static Object getProperty(Object model,String fieldName){
 		try{
 		    return model.getClass().getDeclaredMethod("get"+StringUtils.headUpper(fieldName),null).invoke(model, null);
@@ -74,7 +75,8 @@ public class ModelUtils {
 	 * @return
 	 */
 	public static boolean idValid(Object model){
-		if(null!=getProperty(model, "id")&&!"".equals(getProperty(model, "id"))){
+		String id=String.valueOf(getProperty(model, "id")).trim();
+		if(null!=getProperty(model, "id")&&!"".equals(id)&&!"null".equalsIgnoreCase(id)){
 			return true;
 		}
 		return false;

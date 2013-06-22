@@ -14,6 +14,8 @@ public class Model extends ArrayList<MField> {
 	private int size=0;
 	private String id=null;
 	private String tableName=null;
+	private String[] fieldNames=null;
+	private String[] columnNames=null;
 	private StringBuffer sber=new StringBuffer();
 	
 	public Model(Class<?> cls){
@@ -36,6 +38,8 @@ public class Model extends ArrayList<MField> {
 		for(Field field:fields){
 			if(ModelUtils.isNumber(field)){
 				type=1;
+			}else{
+				type=0;	
 			}
 			if("id".equalsIgnoreCase(field.getName())){
 				id=String.valueOf(ModelUtils.getProperty(obj,field.getName()));
@@ -56,6 +60,8 @@ public class Model extends ArrayList<MField> {
 		for(Field field:fields){
 			if(ModelUtils.isNumber(field)){
 				type=1;
+			}else{
+				type=0;
 			}
 			add(new MField(field.getName(),ModelUtils.getColumnName(field),type,null));
 		}
@@ -77,15 +83,15 @@ public class Model extends ArrayList<MField> {
 	
 	/**
 	 * 得到指定字段对象。
-	 * @param fieldName
+	 * @param name
 	 * @return
 	 */
-	public MField getMField(String fieldName){
+	public MField getMField(String name){
 		Iterator<MField> it=iterator();
 		MField mf=null;
 		while(it.hasNext()){
 			mf=it.next();
-			if(fieldName.equalsIgnoreCase(mf.getFieldName())){
+			if(name.equalsIgnoreCase(mf.getFieldName())||name.equalsIgnoreCase(mf.getColumnName())){
 				return mf;
 			}
 		}
@@ -126,6 +132,34 @@ public class Model extends ArrayList<MField> {
 
 	public int getSize() {
 		return size;
+	}
+
+	public String[] getFieldNames() {
+		if(null==fieldNames){
+			fieldNames=new String[size];
+			Iterator<MField> mfs=iterator();
+			MField mf=null;
+			int i=0;
+			while(mfs.hasNext()){
+				mf=mfs.next();
+				fieldNames[i++]=mf.getFieldName();
+			}
+		}
+		return fieldNames;
+	}
+	
+	public String[] getColumnNames(){
+		if(null==columnNames){
+			columnNames=new String[size];
+			Iterator<MField> mfs=iterator();
+			MField mf=null;
+			int i=0;
+			while(mfs.hasNext()){
+				mf=mfs.next();
+				columnNames[i++]=mf.getColumnName();
+			}
+		}
+		return columnNames;
 	}
 	
 }

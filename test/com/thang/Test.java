@@ -14,9 +14,8 @@ public class Test {
 	public static void main(String[] args) throws Exception {
 		User u=new User();
 		//DbUtils.loadDriver("com.mysql.jdbc.Driver");
-		u.setId("good");
+		u.setId(1);
 		u.setUname("gandilong");
-		u.setType(13025);
 		
 		
 		/*
@@ -41,8 +40,8 @@ public class Test {
 		DBExecutor dbe=new DBExecutor();
  //User uu=dbe.get(User.class, "aaaa");
 		//u.setId("00adfsddfdffswer");
-		dbe.insert(u);
-		dbe.delete(User.class,"good");
+		//dbe.insert(u);
+		//dbe.delete(User.class,"good");
 		long start=System.currentTimeMillis();
 		//u.setUname("hahaha");
 		//dbe.update(u);
@@ -56,10 +55,10 @@ public class Test {
 		//dbe.update(uu);
 		System.out.println(us.size());
 		System.out.println(System.currentTimeMillis()-start);
-		new Thread() {public void run() { 
+		//new Thread() {public void run() { 
 			// JUnitCore.runClasses(new Class[] { TestExample.class }); 
 			// new JUnitCore().run(Request.method(TestExample.class, "testMethod"));
-			}}.start();
+			//}}.start();
 
 		//dbe.delete(User.class, "good");
 		

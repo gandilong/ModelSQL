@@ -1,6 +1,6 @@
 package com.thang.utils.lang;
 
-public class StringUtils {
+public class StringUtils extends org.apache.commons.lang.StringUtils{
 
 	public static String println(String source){
 		System.out.println(source);
@@ -9,7 +9,11 @@ public class StringUtils {
 	
 	public static String headUpper(String value){
 		char[] chars=value.toCharArray();
-		chars[0]=Character.toUpperCase(chars[0]);
+		if(null!=chars&&chars.length>1&&Character.isUpperCase(chars[1])){
+			
+		}else{
+		    chars[0]=Character.toUpperCase(chars[0]);
+		}
 		return String.valueOf(chars);
 	}
 	
