@@ -1,2 +1,2 @@
-Mini HiberModelSQL
+Mini ORM Operator=>ModelSQL
 ========
