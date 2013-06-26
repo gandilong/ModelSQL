@@ -1,12 +1,15 @@
 package com.thang.executor;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.MapHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.thang.model.Condition;
@@ -32,6 +35,46 @@ public class DBExecutor {
 			e.printStackTrace();
 		}
 		return total;
+	}
+	
+	/**
+	 * 执行sql语句
+	 * @param sql
+	 */
+	public void execute(String sql){
+		try{
+		    queryRunner.update(sql);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 查询一条记录，返回用Map实例封装。
+	 * @param sql
+	 * @return
+	 */
+	public Map<String,Object> queryForMap(String sql){
+		try{
+		   return queryRunner.query(sql, new MapHandler(ModelProcessor.getInstance()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 查询多条记录，返回用List<Map>实例封装。
+	 * @param sql
+	 * @return
+	 */
+	public List<Map<String,Object>> queryForMaps(String sql){
+		try{
+		   return queryRunner.query(sql, new MapListHandler(ModelProcessor.getInstance()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/**
