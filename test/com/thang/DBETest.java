@@ -25,7 +25,7 @@ public class DBETest {
 		user.setUserName("gandilong");
 		user.setSex("0");
 		user.setOpt("好的");
-		dbe.insert(user,false);
+		dbe.insert(user);
 	}
 
 	//@Test

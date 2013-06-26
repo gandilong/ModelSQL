@@ -9,16 +9,16 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
-import com.thang.db.DBPools;
 import com.thang.model.Condition;
 import com.thang.model.Model;
 import com.thang.model.sql.SQLGener;
 import com.thang.processor.ModelProcessor;
+import com.thang.utils.db.ConnectionUtils;
 import com.thang.utils.reflect.ModelUtils;
 
 public class DBExecutor {
 
-	private static DataSource dataSource=DBPools.getDataSource();
+	private static DataSource dataSource=ConnectionUtils.getDataSource();
 	private static QueryRunner queryRunner=new QueryRunner(dataSource);
 	
 	public DBExecutor(){}
@@ -33,15 +33,26 @@ public class DBExecutor {
 		}
 		return total;
 	}
+	
 	/**
 	 * 增加一条数据记录，如果ID为空，则根据ID类型自增ID。
 	 * @param pojo
 	 */
-	public void insert(Object pojo,boolean generId){
+	public void insert(Object pojo){
 		try{
-		    if(generId&&!ModelUtils.idValid(pojo)){//假如实体ID值有效，则不自增，不然自增一个ID值。
-		    	ModelUtils.installID(pojo);
-		    }
+		    queryRunner.update(SQLGener.InsertSQL(new Model(pojo)));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 增加一条数据记录，如果ID为空，则根据ID类型自增ID。
+	 * @param pojo
+	 */
+	public void insertWidthID(Object pojo){
+		try{
+		    ModelUtils.installID(pojo);
 		    queryRunner.update(SQLGener.InsertSQL(new Model(pojo)));
 		}catch(Exception e){
 			e.printStackTrace();
