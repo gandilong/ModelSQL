@@ -42,32 +42,69 @@
   </ul>
 </p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+<pre>
+    <code>
+	    src/dbconfig.properties
+	    DBExecutor dbe=new DBExecutor();
+    </code>
+	
+</pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>
+  <b style="color:red">注意事项：</b>
+  <br/>
+  当前版本是ModelSQL_V1.0.jar。
+  <br/>只限于MySQL数据库。
+  <br/>
+	实体主键字段只能是id(不分大小写)。  
+</p>
 
 <h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<a name="designer-templates" class="anchor" href="javascript:void(0)"><span class="octicon octicon-link"></span></a>新增操作</h3>
 
-<p>如果您有任何有关ModelSQL的问题<a href="javascript:void(0)">http://gandilong.github.io/ModelSQL</a> 或者发邮件到 <a href="mailto:gandilong@yeah.net">gandilong@yeah.net</a> 我将尽快为您解决.</p>
+<p>
+    dbe.insert(user);//插入到数据库<br/>
+    dbe.insertWithID(user);//自动生成ID值,并插入到数据库
+</p>
+
+<h3>
+<a name="rather-drive-stick" class="anchor" href="javascript:void(0)"><span class="octicon octicon-link"></span></a>删除操作</h3>
+
+<p><code>
+   dbe.delete(User.class,102012);<br/>
+   或<br/>
+   dbe.delete(User.class,"flkwe-ew12-323jkl23");
+</code></p>
+
+<h3>
+<a name="authors-and-contributors" class="anchor" href="javascript:void(0)"><span class="octicon octicon-link"></span></a>修改操作</h3>
+
+<p>
+  <code>
+     dbe.update(user);//实例中必须要有ID
+  </code>
+</p>
+
+<h3>
+<a name="support-or-contact" class="anchor" href="javascript:void(0)"><span class="octicon octicon-link"></span></a>查询操作</h3>
+<p>
+  <code>
+      dbe.get(User.class,102012);//得到一条记录，并封装到User实例中。<br/>
+	  dbe.get(User.class,"flkwe-ew12-323jkl23");
+	  <br/><br/>
+	  dbe.list(User.class);//查询所有user记录。<br/>
+	  dbe.listDesc(User.class,"id");//查询所有user记录，并用id按降序排序<br/>
+	  dbe.listAsc(User.class,"id,name");//查询所有user记录，并用id,name按升序排序<br/>
+
+	  <br/><br/>
+      Condition condition=new Condition(User.class,true);//创建User类的条件实例并进行分页。<br/>
+	  condition.like(name,"gandilong");<br/>
+	  dbe.list(User.class,condition);
+  </code>
+</p>
+
+<br/>
+<p>如果您有任何有关ModelSQL的问题，请到<a href="javascript:void(0)">http://gandilong.github.io/ModelSQL</a>查看是否有更新版本 或者发邮件到 <a href="mailto:gandilong@yeah.net">gandilong@yeah.net</a> 我将尽快为您解决.</p>
       </section>
       <footer>
         <p>项目维护者： <a href="https://github.com/gandilong">gandilong</a></p>
