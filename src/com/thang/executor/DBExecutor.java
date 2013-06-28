@@ -101,6 +101,13 @@ public class DBExecutor {
 			e.printStackTrace();
 		}
 	}
+
+    /**
+     *判断ID字段是否有值，来进行操作
+     */
+	public void insertOrUpdate(){
+
+	}
 	
 	/**
 	 * 根据整数ID删除数据。
