@@ -1,6 +1,5 @@
 package com.thang.executor;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +9,6 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
-import org.apache.commons.dbutils.handlers.KeyedHandler;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
@@ -52,7 +50,14 @@ public class DBExecutor {
 		}
 	}
 	
-	public List<Object> column(Class<?> cls,String fieldName,long id){
+	/**
+	 * 得到一个列对象
+	 * @param cls
+	 * @param fieldName
+	 * @param id
+	 * @return
+	 */
+	public Object column(Class<?> cls,String fieldName,long id){
     	try{
     		Model model=new Model(cls);
     		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE ID="+id, new ColumnListHandler<Object>(fieldName));
@@ -60,9 +65,16 @@ public class DBExecutor {
     		e.printStackTrace();
     	}
     	return null;
- }
+    }
 	
-	 public List<Object> column(Class<?> cls,String fieldName,String id){
+	/**
+	 * 得到一个列对象
+	 * @param cls
+	 * @param fieldName
+	 * @param id
+	 * @return
+	 */
+	public Object column(Class<?> cls,String fieldName,String id){
 	    	try{
 	    		Model model=new Model(cls);
 	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE ID='"+id+"'", new ColumnListHandler<Object>(fieldName));
@@ -72,7 +84,10 @@ public class DBExecutor {
 	    	return null;
 	 }
 	
-	 public List<Object> columns(Class<?> cls,String fieldName){
+	/**
+	 * 得到列对象集合
+	 */
+	public List<Object> columns(Class<?> cls,String fieldName){
 	    	try{
 	    		Model model=new Model(cls);
 	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName(), new ColumnListHandler<Object>(fieldName));
@@ -81,13 +96,72 @@ public class DBExecutor {
 	    	}
 	    	return null;
 	 }
+	
+	public Map<String,Object> map(Class<?> cls,long id){
+		try{
+			  return queryRunner.query(SQLGener.SimpleSelectSQL(new Model(cls,id)), new MapHandler(ModelProcessor.getInstance()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public Map<String,Object> map(Class<?> cls,String id){
+		try{
+			  return queryRunner.query(SQLGener.SimpleSelectSQL(new Model(cls,id)), new MapHandler(ModelProcessor.getInstance()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public List<Map<String,Object>> maps(Class<?> cls){//default is id desc
+		 try{
+		   	return queryRunner.query(SQLGener.SelectSQL(new Model(cls)),new MapListHandler(ModelProcessor.getInstance()));
+		 }catch(Exception e){
+		 	e.printStackTrace();
+		 }
+		 return null;
+	}
+	
+	public List<Map<String,Object>> mapsDesc(Class<?> cls,String fieldNames){
+		 try{
+		   	return queryRunner.query(SQLGener.SelectDescSQL(new Model(cls),fieldNames),new MapListHandler(ModelProcessor.getInstance()));
+		 }catch(Exception e){
+		 	e.printStackTrace();
+		 }
+		 return null;
+	}
+	
+	public List<Map<String,Object>> mapsAsc(Class<?> cls,String fieldNames){
+		 try{
+		   	return queryRunner.query(SQLGener.SelectAscSQL(new Model(cls),fieldNames),new MapListHandler(ModelProcessor.getInstance()));
+		 }catch(Exception e){
+		 	e.printStackTrace();
+		 }
+		 return null;
+	}
+	
+	/**
+	 * 根据condition对象进行分布查询。
+	 * @param page
+	 * @return
+	 */
+	public List<Map<String,Object>> maps(Class<?> cls,Condition condition){
+	    try{
+	    	return queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition),new MapListHandler(ModelProcessor.getInstance()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
 	 
 	/**
 	 * 查询一条记录，返回用Map实例封装。
 	 * @param sql
 	 * @return
 	 */
-	public Map<String,Object> rowMap(String sql){
+	public Map<String,Object> map(String sql){
 		try{
 		   return queryRunner.query(sql, new MapHandler(ModelProcessor.getInstance()));
 		}catch(Exception e){
@@ -101,7 +175,7 @@ public class DBExecutor {
 	 * @param sql
 	 * @return
 	 */
-	public List<Map<String,Object>> rowMaps(String sql){
+	public List<Map<String,Object>> maps(String sql){
 		try{
 		   return queryRunner.query(sql, new MapListHandler(ModelProcessor.getInstance()));
 		}catch(Exception e){
@@ -186,20 +260,20 @@ public class DBExecutor {
 		 return result;
 	}
 	
-	public <T>List<T> listDesc(Class<T> cls,String columns){
+	public <T>List<T> listDesc(Class<T> cls,String fieldNames){
 		List<T> result=null;
 		 try{
-		   	result=(List<T>)queryRunner.query(SQLGener.SelectDescSQL(new Model(cls),columns),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		   	result=(List<T>)queryRunner.query(SQLGener.SelectDescSQL(new Model(cls),fieldNames),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
 		 return result;
 	}
 	
-	public <T>List<T> listAsc(Class<T> cls,String columns){
+	public <T>List<T> listAsc(Class<T> cls,String fieldNames){
 		List<T> result=null;
 		 try{
-		   	result=(List<T>)queryRunner.query(SQLGener.SelectAscSQL(new Model(cls),columns),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		   	result=(List<T>)queryRunner.query(SQLGener.SelectAscSQL(new Model(cls),fieldNames),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -215,6 +289,21 @@ public class DBExecutor {
 	    List<T> result=null;
 	    try{
 	    	result=(List<T>)queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	/**
+	 * 根据condition对象进行分布查询。
+	 * @param page
+	 * @return
+	 */
+	public <T>List<T> list(String sql,Class<T> cls){
+	    List<T> result=null;
+	    try{
+	    	result=(List<T>)queryRunner.query(sql,new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		}catch(Exception e){
 			e.printStackTrace();
 		}

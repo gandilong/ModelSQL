@@ -48,8 +48,8 @@ public class DBETest {
 		
 	}
 	
-    @Test
-		public void testListCondition() {
+    //@Test
+	public void testListCondition() {
     	Condition cod=new Condition(User.class);
     	//cod.getPage().setPageNow(1);
     	cod.eq("userName", "gandilong");
@@ -100,7 +100,10 @@ public class DBETest {
 
 	@Test
 	public void testSetDataSource() {
-		
+		List<User> users=dbe.listAsc(User.class,"userName");
+		for(User user:users){
+			System.out.println(user.toString());
+		}
 	}
 
 }
