@@ -81,7 +81,7 @@ public class ModelUtils {
 	 */
 	public static boolean idValid(Object model){
 		String id=String.valueOf(getProperty(model, "id")).trim();
-		if(null!=getProperty(model, "id")&&!"".equals(id)&&!"null".equalsIgnoreCase(id)){
+		if(null!=getProperty(model, "id")&&!"".equals(id)&&!"0".equals(id)&&!"null".equalsIgnoreCase(id)){
 			return true;
 		}
 		return false;

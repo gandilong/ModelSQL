@@ -9,7 +9,7 @@ import com.thang.model.mate.Table;
 @Table("sys_user_info")
 public class User {
 
-	private long id;
+	private Integer id;
 	
 	@Column("user_name")
 	private String userName;
@@ -24,14 +24,13 @@ public class User {
 	private String image;//头像
 	private String sex;//0 girl, 1 boy
 	
-	@Column("dept_id")
-	private String deptId;//部门
+	private String dept;//部门
 	private String opt;//备注
 	
-	public long getId() {
+	public Integer getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	public String getUserName() {
@@ -70,11 +69,12 @@ public class User {
 	public void setSex(String sex) {
 		this.sex = sex;
 	}
-	public String getDeptId() {
-		return deptId;
+	 
+	public String getDept() {
+		return dept;
 	}
-	public void setDeptId(String deptId) {
-		this.deptId = deptId;
+	public void setDept(String dept) {
+		this.dept = dept;
 	}
 	public String getOpt() {
 		return opt;
@@ -86,7 +86,7 @@ public class User {
 	public String toString() {
 		return "User [id=" + id + ", userName=" + userName + ", loginName="
 				+ loginName + ", loginPass=" + loginPass + ", birth=" + birth
-				+ ", image=" + image + ", sex=" + sex + ", deptId=" + deptId
+				+ ", image=" + image + ", sex=" + sex + ", dept=" + dept
 				+ ", opt=" + opt + "]";
 	}
 	

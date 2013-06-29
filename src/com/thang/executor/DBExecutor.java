@@ -1,5 +1,6 @@
 package com.thang.executor;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,8 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.KeyedHandler;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
@@ -49,12 +52,42 @@ public class DBExecutor {
 		}
 	}
 	
+	public List<Object> column(Class<?> cls,String fieldName,long id){
+    	try{
+    		Model model=new Model(cls);
+    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE ID="+id, new ColumnListHandler<Object>(fieldName));
+    	}catch(Exception e){
+    		e.printStackTrace();
+    	}
+    	return null;
+ }
+	
+	 public List<Object> column(Class<?> cls,String fieldName,String id){
+	    	try{
+	    		Model model=new Model(cls);
+	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE ID='"+id+"'", new ColumnListHandler<Object>(fieldName));
+	    	}catch(Exception e){
+	    		e.printStackTrace();
+	    	}
+	    	return null;
+	 }
+	
+	 public List<Object> columns(Class<?> cls,String fieldName){
+	    	try{
+	    		Model model=new Model(cls);
+	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName(), new ColumnListHandler<Object>(fieldName));
+	    	}catch(Exception e){
+	    		e.printStackTrace();
+	    	}
+	    	return null;
+	 }
+	 
 	/**
 	 * 查询一条记录，返回用Map实例封装。
 	 * @param sql
 	 * @return
 	 */
-	public Map<String,Object> queryForMap(String sql){
+	public Map<String,Object> rowMap(String sql){
 		try{
 		   return queryRunner.query(sql, new MapHandler(ModelProcessor.getInstance()));
 		}catch(Exception e){
@@ -68,7 +101,7 @@ public class DBExecutor {
 	 * @param sql
 	 * @return
 	 */
-	public List<Map<String,Object>> queryForMaps(String sql){
+	public List<Map<String,Object>> rowMaps(String sql){
 		try{
 		   return queryRunner.query(sql, new MapListHandler(ModelProcessor.getInstance()));
 		}catch(Exception e){
@@ -105,8 +138,12 @@ public class DBExecutor {
     /**
      *判断ID字段是否有值，来进行操作
      */
-	public void insertOrUpdate(){
-
+	public void insertOrUpdate(Object obj){
+        if(ModelUtils.idValid(obj)){
+        	update(obj);
+        }else{
+        	insert(obj);
+        }
 	}
 	
 	/**

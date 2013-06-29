@@ -69,7 +69,7 @@ public class DBETest {
 	public void testGetClassOfTLong() {
 		User u=dbe.get(User.class, 8);
 		
-		System.out.println(u.getDeptId());
+		//System.out.println(u.getDeptId());
 		
 		
 		System.out.println(u.toString());
