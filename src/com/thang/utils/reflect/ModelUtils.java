@@ -80,11 +80,32 @@ public class ModelUtils {
 	 * @return
 	 */
 	public static boolean idValid(Object model){
-		String id=String.valueOf(getProperty(model, "id")).trim();
-		if(null!=getProperty(model, "id")&&!"".equals(id)&&!"0".equals(id)&&!"null".equalsIgnoreCase(id)){
+		Field fid=getPrimaryKey(model.getClass());
+		String id=String.valueOf(getProperty(model, fid.getName())).trim();
+		if(null!=id&&!"".equals(id)&&!"0".equals(id)&&!"null".equalsIgnoreCase(id)){
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * 默认ID是主键，如要覆盖用primary注解
+	 * @param model
+	 * @return
+	 */
+	public static Field getPrimaryKey(Class<?> model){
+		Field[] fields=model.getDeclaredFields();
+		for(Field field:fields){
+			if(field.isAnnotationPresent(com.thang.model.mate.Primary.class)){
+				return field;
+			}
+		}
+		for(Field field:fields){
+			if("id".equalsIgnoreCase(field.getName())){
+				return field;
+			}
+		}
+		return null;
 	}
 	
 	
@@ -94,10 +115,11 @@ public class ModelUtils {
 	 */
 	public static void installID(Object model){
 		try{
-		    if(isNumber(model.getClass().getDeclaredField("id"))){
-			    setProperty(model, "id", DateUtils.formatDate(DateUtils.getLastDatedate(),DateUtils.YYYY_MM_DD_HH_mm_ss_SS).replaceAll("[\\s|\\-|:]",""));
+			Field id=getPrimaryKey(model.getClass());
+		    if(isNumber(id)){
+			    setProperty(model, id.getName(), DateUtils.formatDate(DateUtils.getLastDatedate(),DateUtils.YYYY_MM_DD_HH_mm_ss_SS).replaceAll("[\\s|\\-|:]",""));
 		    }else{
-			    setProperty(model, "id",UUIDUtils.getUUID());
+			    setProperty(model, id.getName(),UUIDUtils.getUUID());
 		    }
 		}catch(Exception e){
 			e.printStackTrace();

@@ -60,7 +60,7 @@ public class DBExecutor {
 	public Object column(Class<?> cls,String fieldName,long id){
     	try{
     		Model model=new Model(cls);
-    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE ID="+id, new ColumnListHandler<Object>(fieldName));
+    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"="+id, new ColumnListHandler<Object>(fieldName));
     	}catch(Exception e){
     		e.printStackTrace();
     	}
@@ -77,7 +77,7 @@ public class DBExecutor {
 	public Object column(Class<?> cls,String fieldName,String id){
 	    	try{
 	    		Model model=new Model(cls);
-	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE ID='"+id+"'", new ColumnListHandler<Object>(fieldName));
+	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"='"+id+"'", new ColumnListHandler<Object>(fieldName));
 	    	}catch(Exception e){
 	    		e.printStackTrace();
 	    	}
@@ -96,6 +96,7 @@ public class DBExecutor {
 	    	}
 	    	return null;
 	 }
+	
 	
 	public Map<String,Object> map(Class<?> cls,long id){
 		try{
@@ -161,7 +162,7 @@ public class DBExecutor {
 	 * @param sql
 	 * @return
 	 */
-	public Map<String,Object> map(String sql){
+	public Map<String,Object> query(String sql){
 		try{
 		   return queryRunner.query(sql, new MapHandler(ModelProcessor.getInstance()));
 		}catch(Exception e){
@@ -300,7 +301,7 @@ public class DBExecutor {
 	 * @param page
 	 * @return
 	 */
-	public <T>List<T> list(String sql,Class<T> cls){
+	public <T>List<T> query(String sql,Class<T> cls){
 	    List<T> result=null;
 	    try{
 	    	result=(List<T>)queryRunner.query(sql,new BeanListHandler<T>(cls,ModelProcessor.getInstance()));

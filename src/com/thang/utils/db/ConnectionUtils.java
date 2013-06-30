@@ -11,6 +11,7 @@ import org.apache.commons.dbutils.DbUtils;
 
 public class ConnectionUtils {
 
+	private static String database=null;
 	private static Properties pros=null;
 	private static Connection conn=null;
 	private static DataSource dataSource=null;
@@ -20,6 +21,7 @@ public class ConnectionUtils {
 		    pros.load(ConnectionUtils.class.getClassLoader().getResourceAsStream("dbconfig.properties"));
 		    DbUtils.loadDriver(pros.getProperty("driverName"));
 		    dataSource=BasicDataSourceFactory.createDataSource(pros);
+		    setDatabase(pros.getProperty("database"));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -43,7 +45,14 @@ public class ConnectionUtils {
 	public static DataSource getDataSource() {
 		return dataSource;
 	}
-	
+
+	public static String getDatabase() {
+		return database;
+	}
+
+	public static void setDatabase(String database) {
+		ConnectionUtils.database = database;
+	}
 	
 	
 }

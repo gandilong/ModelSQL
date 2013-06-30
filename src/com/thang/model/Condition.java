@@ -1,6 +1,7 @@
 package com.thang.model;
 
 
+import com.thang.utils.db.ConnectionUtils;
 import com.thang.utils.reflect.ModelUtils;
 
 public class Condition {
@@ -144,7 +145,7 @@ public class Condition {
 		cdtion.append(getOrder());
 		cdtion.append(" ");
 		
-		if(null!=page){
+		if(null!=page&&"mysql".equalsIgnoreCase(ConnectionUtils.getDatabase())){
 			cdtion.append(" LIMIT ");
 			cdtion.append(page.getPageNow()==1?0:(page.getPageNow()-1)*page.getPageSize());
 			cdtion.append(",");

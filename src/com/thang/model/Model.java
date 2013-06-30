@@ -12,8 +12,9 @@ public class Model extends ArrayList<MField> {
 
 	
 	private int size=0;
-	private String id=null;
 	private String tableName=null;
+	private String primaryFieldName=null;
+	private String primaryFieldValue=null;
 	private String[] fieldNames=null;
 	private String[] columnNames=null;
 	private StringBuffer sber=new StringBuffer();
@@ -23,15 +24,13 @@ public class Model extends ArrayList<MField> {
 	}
 	
 	public Model(Class<?> cls,long id){
-		this.id=String.valueOf(id);
+		setPrimaryFieldValue(String.valueOf(id));
 		loadModel(cls);
-		setId(this.id);
 	}
 	
 	public Model(Class<?> cls,String id){
-		this.id=id;
+		setPrimaryFieldValue(id);
 		loadModel(cls);
-		setId(this.id);
 	}
 	
 	public Model(Object obj){
@@ -47,14 +46,17 @@ public class Model extends ArrayList<MField> {
 		setTableName(ModelUtils.getTableName(obj.getClass()));
 		Field[] fields=obj.getClass().getDeclaredFields();
 		int type=0;
+		Field idField=ModelUtils.getPrimaryKey(obj.getClass());
+		primaryFieldName=idField.getName();
 		for(Field field:fields){
 			if(ModelUtils.isNumber(field)){
 				type=1;
 			}else{
 				type=0;	
 			}
-			if("id".equalsIgnoreCase(field.getName())){
-				id=String.valueOf(ModelUtils.getProperty(obj,field.getName()));
+			
+			if(primaryFieldName.equalsIgnoreCase(field.getName())){
+				primaryFieldValue=String.valueOf(ModelUtils.getProperty(obj,primaryFieldName));
 			}
 			add(new MField(field.getName(),ModelUtils.getColumnName(field),type,String.valueOf(ModelUtils.getProperty(obj,field.getName()))));
 		}
@@ -69,6 +71,8 @@ public class Model extends ArrayList<MField> {
 		setTableName(ModelUtils.getTableName(cls));
 		Field[] fields=cls.getDeclaredFields();
 		int type=0;
+		Field idField=ModelUtils.getPrimaryKey(cls);
+		primaryFieldName=idField.getName();
 		for(Field field:fields){
 			if(ModelUtils.isNumber(field)){
 				type=1;
@@ -110,25 +114,6 @@ public class Model extends ArrayList<MField> {
 		return null;
 	}
 	
-	/**
-	 * 得到ID值。
-	 * @return
-	 */
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		Iterator<MField> it=iterator();
-		MField mf=null;
-		while(it.hasNext()){
-			mf=it.next();
-			if("id".equalsIgnoreCase(mf.getFieldName())){
-				mf.setFieldValue(id);
-			}
-		}
-		this.id = id;
-	}
 
 	public String getTableName() {
 		return tableName;
@@ -144,6 +129,27 @@ public class Model extends ArrayList<MField> {
 
 	public int getSize() {
 		return size;
+	}
+	
+
+	public void setPrimaryFieldValue(String primaryFieldValue) {
+		this.primaryFieldValue = primaryFieldValue;
+	}
+
+	/**
+	 * 得到主键字段名
+	 * @return
+	 */
+	public String getPrimaryFieldName(){
+		return this.primaryFieldName;
+	}
+	
+	/**
+	 * 得到主键字段值
+	 * @return
+	 */
+	public String getPrimaryFieldValue(){
+		return this.primaryFieldValue;
 	}
 
 	public String[] getFieldNames() {

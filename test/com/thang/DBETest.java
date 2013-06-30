@@ -65,9 +65,9 @@ public class DBETest {
 		}
 
 
-	//@Test
+	@Test
 	public void testGetClassOfTLong() {
-		User u=dbe.get(User.class, 8);
+		User u=dbe.get(User.class, 1);
 		
 		//System.out.println(u.getDeptId());
 		
@@ -80,10 +80,10 @@ public class DBETest {
 		User u=dbe.get(User.class, "8");
 	}
 
-	//@Test
+	@Test
 	public void testUpdate() {
 		User u=new User();
-		u.setId(8);
+		u.setId(2);
 		//u.setUserName("gandilong");
 		//u.setLoginName("admin");
 		//u.setLoginPass("su");
