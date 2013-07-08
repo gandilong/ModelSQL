@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import com.thang.executor.DBExecutor;
 import com.thang.model.Condition;
+import com.thang.pojo.Role;
 import com.thang.pojo.User;
 
 public class DBETest {
@@ -65,7 +66,7 @@ public class DBETest {
 		}
 
 
-	@Test
+	//@Test
 	public void testGetClassOfTLong() {
 		User u=dbe.get(User.class, 1);
 		
@@ -80,7 +81,7 @@ public class DBETest {
 		User u=dbe.get(User.class, "8");
 	}
 
-	@Test
+	//@Test
 	public void testUpdate() {
 		User u=new User();
 		u.setId(2);
@@ -100,9 +101,9 @@ public class DBETest {
 
 	@Test
 	public void testSetDataSource() {
-		List<User> users=dbe.listAsc(User.class,"userName");
-		for(User user:users){
-			System.out.println(user.toString());
+		List<Role> roles=dbe.list(Role.class);
+		for(Role r:roles){
+			System.out.println(r.toString());
 		}
 	}
 
