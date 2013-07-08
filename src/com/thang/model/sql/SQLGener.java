@@ -7,6 +7,11 @@ import com.thang.model.Model;
 import com.thang.utils.db.ConnectionUtils;
 import com.thang.utils.lang.StringUtils;
 
+/**
+ * 核心sql生成方法
+ * @author gandilong
+ *
+ */
 public class SQLGener {
 	
 	public static String InsertSQL(Model model){
