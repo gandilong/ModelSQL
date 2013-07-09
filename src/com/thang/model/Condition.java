@@ -1,8 +1,10 @@
 package com.thang.model;
 
 
+import com.thang.model.mate.MateType;
 import com.thang.utils.db.ConnectionUtils;
 import com.thang.utils.reflect.ModelUtils;
+import java.lang.reflect.Field;
 
 public class Condition {
 
@@ -37,7 +39,23 @@ public class Condition {
 	}
 	
 	public void setDefault(Object pojo){
-		
+	     Field[] fields=model.getDeclaredFields();
+             for(Field field:fields){
+                    if(null!=ModelUtils.getProperty(pojo, field.getName())){
+                        if(field.isAnnotationPresent(com.thang.model.mate.Mate.class)){
+                            MateType type=field.getAnnotation(com.thang.model.mate.Mate.class).value();
+                            switch(type.value()){
+                                case 0: eq(field.getName(),ModelUtils.getProperty(pojo, field.getName())); break;
+                                case 1: like(field.getName(),ModelUtils.getProperty(pojo, field.getName())); break;
+                                default:break;
+                            }
+                        }else{
+                            eq(field.getName(),ModelUtils.getProperty(pojo, field.getName())); 
+                        }
+                        
+                    }
+             }
+                
 	}
 	
 	public void addCondition(String fieldName,Link link,String fieldValue){
@@ -68,41 +86,65 @@ public class Condition {
 	}
 	
 	public Condition eq(String fieldName, Object fieldValue) {
-		if(fieldValue.getClass() == this.model){
-            addCondition(fieldName,Link.EQUAL,ModelUtils.getProperty(fieldValue,fieldName));
-		}else{
-		    addCondition(fieldName,Link.EQUAL,String.valueOf(fieldValue));
+	    if(fieldValue.getClass() == this.model){
+                  addCondition(fieldName,Link.EQUAL,String.valueOf(ModelUtils.getProperty(fieldValue,fieldName)));
+	    }else{
+		  addCondition(fieldName,Link.EQUAL,String.valueOf(fieldValue));
 	    }
 		return this;
 	}
 
-	public Condition ne(String fieldName, String fieldValue) {
-		addCondition(fieldName,Link.NOT_EQUAL,fieldValue);
+	public Condition ne(String fieldName, Object fieldValue) {
+             if(fieldValue.getClass() == this.model){
+                  addCondition(fieldName,Link.NOT_EQUAL,String.valueOf(ModelUtils.getProperty(fieldValue,fieldName)));
+	     }else{
+		  addCondition(fieldName,Link.NOT_EQUAL,String.valueOf(fieldValue));
+             }
 		return this;
 	}
 
-	public Condition le(String fieldName, String fieldValue) {
-		addCondition(fieldName,Link.LESS_EQUAL,fieldValue);
+	public Condition le(String fieldName, Object fieldValue) {
+             if(fieldValue.getClass() == this.model){
+                  addCondition(fieldName,Link.LESS_EQUAL,String.valueOf(ModelUtils.getProperty(fieldValue,fieldName)));
+	     }else{
+		addCondition(fieldName,Link.LESS_EQUAL,String.valueOf(fieldValue));
+             }
 		return this;
 	}
 
-	public Condition ge(String fieldName, String fieldValue) {
-		addCondition(fieldName,Link.GRATE_EQUAL,fieldValue);
+	public Condition ge(String fieldName, Object fieldValue) {
+            if(fieldValue.getClass() == this.model){
+                  addCondition(fieldName,Link.GRATE_EQUAL,String.valueOf(ModelUtils.getProperty(fieldValue,fieldName)));
+	     }else{
+		addCondition(fieldName,Link.GRATE_EQUAL,String.valueOf(fieldValue));
+            }
 		return this;
 	}
 
-	public Condition gt(String fieldName, String fieldValue) {
-		addCondition(fieldName,Link.GRATE_THAN,fieldValue);
+	public Condition gt(String fieldName, Object fieldValue) {
+            if(fieldValue.getClass() == this.model){
+                  addCondition(fieldName,Link.GRATE_THAN,String.valueOf(ModelUtils.getProperty(fieldValue,fieldName)));
+	     }else{
+		addCondition(fieldName,Link.GRATE_THAN,String.valueOf(fieldValue));
+            }
 		return this;
 	}
 
-	public Condition lt(String fieldName, String fieldValue) {
-		addCondition(fieldName,Link.LESS_THAN,fieldValue);
+	public Condition lt(String fieldName, Object fieldValue) {
+            if(fieldValue.getClass() == this.model){
+                  addCondition(fieldName,Link.LESS_THAN,String.valueOf(ModelUtils.getProperty(fieldValue,fieldName)));
+	     }else{
+		addCondition(fieldName,Link.LESS_THAN,String.valueOf(fieldValue));
+            }
 		return this;
 	}
 
-	public Condition like(String fieldName, String fieldValue) {
-		addCondition(fieldName,Link.LIKE,fieldValue);
+	public Condition like(String fieldName, Object fieldValue) {
+             if(fieldValue.getClass() == this.model){
+                  addCondition(fieldName,Link.LIKE,String.valueOf(ModelUtils.getProperty(fieldValue,fieldName)));
+	     }else{
+		addCondition(fieldName,Link.LIKE,String.valueOf(fieldValue));
+             }
 		return this;
 	}
 

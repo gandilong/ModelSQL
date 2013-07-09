@@ -18,7 +18,7 @@ public class ModelUtils {
 	public static Object getProperty(Object model,String fieldName){
 		Object value=null;
 		try{
-		    value=model.getClass().getDeclaredMethod("get"+StringUtils.headUpper(fieldName),null).invoke(model, null);
+		    value=model.getClass().getDeclaredMethod("get"+StringUtils.headUpper(fieldName),new Class[]{}).invoke(model, new Object[]{});
 		    if(null==value){
 		    	return "";
 		    }
@@ -35,8 +35,12 @@ public class ModelUtils {
 	 * @param fieldName
 	 * @param value
 	 */
-	public static void setProperty(Object model,String fieldName,Object value){
-		
+	public static void setProperty(Object model,String fieldName,Object[] value){
+		try{
+		    model.getClass().getDeclaredMethod("set"+StringUtils.headUpper(fieldName),new Class[]{Object.class}).invoke(model, value); 
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	public static boolean isNumber(Field field){
@@ -117,9 +121,9 @@ public class ModelUtils {
 		try{
 			Field id=getPrimaryKey(model.getClass());
 		    if(isNumber(id)){
-			    setProperty(model, id.getName(), DateUtils.formatDate(DateUtils.getLastDatedate(),DateUtils.YYYY_MM_DD_HH_mm_ss_SS).replaceAll("[\\s|\\-|:]",""));
+			    setProperty(model, id.getName(), new Object[]{DateUtils.formatDate(DateUtils.getLastDatedate(),DateUtils.YYYY_MM_DD_HH_mm_ss_SS).replaceAll("[\\s|\\-|:]","")});
 		    }else{
-			    setProperty(model, id.getName(),UUIDUtils.getUUID());
+			    setProperty(model, id.getName(),new Object[]{UUIDUtils.getUUID()});
 		    }
 		}catch(Exception e){
 			e.printStackTrace();
