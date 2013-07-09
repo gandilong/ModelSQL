@@ -28,6 +28,18 @@ public class Condition {
 		cdtion=new StringBuilder();
 	}
 	
+	public Condition(Object pojo,boolean toPage){
+		if(toPage){
+			page=new Page(pojo.getClass());	
+		}
+		model=pojo.getClass();
+		cdtion=new StringBuilder();
+	}
+	
+	public void setDefault(Object pojo){
+		
+	}
+	
 	public void addCondition(String fieldName,Link link,String fieldValue){
 		try{
 			
