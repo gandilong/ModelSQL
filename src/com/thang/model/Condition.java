@@ -55,8 +55,12 @@ public class Condition {
 	    }
 	}
 	
-	public Condition eq(String fieldName, String fieldValue) {
-		addCondition(fieldName,Link.EQUAL,fieldValue);
+	public Condition eq(String fieldName, Object fieldValue) {
+		if(fieldValue.getClass() == this.model){
+            addCondition(fieldName,Link.EQUAL,ModelUtils.getProperty(fieldValue,fieldName));
+		}else{
+		    addCondition(fieldName,Link.EQUAL,String.valueOf(fieldValue));
+	    }
 		return this;
 	}
 
