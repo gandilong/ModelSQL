@@ -38,14 +38,13 @@
       <li>commons-pool-1.6.jar</li>
       <li>commons-dbcp-1.4.jar</li>
       <li>commons-dbutils-1.5.jar</li>
-      <li>mysql-connector-java-5.1.17-bin.jar</li>
+      <li>相关数据库驱动包</li>
   </ul>
 </p>
 
 <pre>
     <code>
-	    src/dbconfig.properties
-	    DBExecutor dbe=new DBExecutor();
+	     DBExecutor dbe==new DBExecutor("com.mysql.jdbc.Driver","jdbc:mysql://localhost:3306/test","root","su","mysql");
     </code>
 	
 </pre>
@@ -54,7 +53,7 @@
   <b style="color:red">注意事项：</b>
   <br/>
   当前版本是ModelSQL_V1.0.jar。
-  <br/>只限于MySQL数据库。
+  <br/>只限于MySQL和Oracle数据库适用。
   <br/>
 	实体主键字段只能是id(不分大小写)。  
 </p>
@@ -97,7 +96,7 @@
 	  dbe.listAsc(User.class,"id,name");//查询所有user记录，并用id,name按升序排序<br/>
 
 	  <br/><br/>
-      Condition condition=new Condition(User.class,true);//创建User类的条件实例并进行分页。<br/>
+      Condition condition=new Condition(User.class,new Page());//创建User类的条件实例并进行分页。<br/>
 	  condition.like(name,"gandilong");<br/>
 	  dbe.list(User.class,condition);
   </code>
