@@ -1,6 +1,7 @@
 package com.thang.model.sql;
 
 import com.thang.exception.NullFieldException;
+import com.thang.executor.DBExecutor;
 import com.thang.model.Condition;
 import com.thang.model.MField;
 import com.thang.model.Model;
@@ -38,8 +39,8 @@ public class SQLGener {
 		return StringUtils.println(GenerSelectConditioncSQL(model,condition));
 	}
 	
-	public static String SelectSQL(Model model,Condition condition){
-		return StringUtils.println(GenerSelectSQL(model,condition));
+	public static String CountSQL(Model model,Condition condition){
+		return StringUtils.println(countSQL(model,condition));
 	}
 	
 	public static String SimpleSelectSQL(Model model){
@@ -263,36 +264,43 @@ public class SQLGener {
 	
 	public static String GenerSelectConditioncSQL(Model model,Condition cd){//多个字段之间要加逗号
 		StringBuilder sber=new StringBuilder();
-        String[] columnNames=model.getColumnNames();
-		if(null!=model&&"oracle".equalsIgnoreCase(ConnectionUtils.getDatabase())){
+                String[] columnNames=model.getColumnNames();
+                
+		if(null!=model&&"oracle".equalsIgnoreCase(cd.getDatabase())&&null!=cd.getPage()){
 			sber.append("SELECT \n ");
 			sber.append(StringUtils.join(columnNames,","));
-			sber.append(" \nFROM \n");
-			sber.append(" \nSELECT t.*,ROWNUM RN");
-			sber.append(" \nFROM ( ");
+                        sber.append(",RN ");
+			sber.append(" \nFROM (");
+			sber.append(" \n    SELECT t.*,ROWNUM RN  FROM (");
 		}
 		if(null!=model){
-			sber.append("SELECT \n ");
+			sber.append("\n           SELECT \n                 ");
 			sber.append(StringUtils.join(columnNames,","));
-			sber.append(" \nFROM \n ");
+			sber.append("\n           FROM  ");
 			sber.append(model.getTableName());
-			sber.append(" t ");
-			sber.append(" \nWHERE \n");
+			sber.append(" \n           WHERE ");
 			sber.append(cd.getCdtion().toString());
 		}
-		if(null!=model&&"oracle".equalsIgnoreCase(ConnectionUtils.getDatabase())){
-			sber.append(") WHERE ROWNUM<=");
-			sber.append((cd.getPage().getPageNow()+1)*cd.getPage().getPageSize());
-			sber.append(" \n) RN >=");
+		if(null!=model&&"oracle".equalsIgnoreCase(cd.getDatabase())&&null!=cd.getPage()){
+			sber.append("\n    ) t WHERE ROWNUM<=");
 			sber.append(cd.getPage().getPageNow()*cd.getPage().getPageSize());
+			sber.append(" \n) WHERE RN >=");
+                        sber.append(cd.getPage().getPageNow()==1?0:(cd.getPage().getPageNow()-1)*cd.getPage().getPageSize());
 		}
 		return sber.toString();
 	}
 	
-	
-	public static String GenerSelectSQL(Model model,Condition condition){
+	public static String countSQL(Model model,Condition condition){
 		StringBuilder sber=new StringBuilder();
-		
+                String[] columnNames=model.getColumnNames();
+                sber.append("SELECT COUNT(*) FROM (");
+		sber.append("\n    SELECT  ");
+		sber.append(StringUtils.join(columnNames,","));
+		sber.append(" \n    FROM  ");
+		sber.append(model.getTableName());
+		sber.append(" \n    WHERE  ");
+		sber.append(condition.toString());
+                sber.append("\n) c ");
 		return sber.toString();
 	}
 	

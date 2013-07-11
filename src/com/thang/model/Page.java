@@ -8,32 +8,23 @@ public class Page {
 	private long pageSize=15;//每页多少条数据
 	private long total=0;//总条数
 	
-	private Class<?> model=null;
 	
-	private static DBExecutor dbe=new DBExecutor();
+	public Page(){}
 	
-	public Page(Class<?> model){
-		this.model=model;
-		init();
-	};
-	
-	public Page(long pageNow,Class<?> model) {
+	public Page(long pageNow) {
 		this.pageNow = pageNow;
-		this.model=model;
-		init();
 	}
 	
 	public Page(long pageNow, long pageSize,Class<?> model) {
 		this.pageNow = pageNow;
 		this.pageSize = pageSize;
-		this.model=model;
-		init();
+		
 	}
 	
 	
-	public void init(){
-		if(null!=model){
-		    total=dbe.num(model);
+	public void setTotal(long total){
+		if(0!=total){
+		    this.total=total;
 		    pageNum=(total/pageSize)+(total%pageSize==0?0:1);
 		}
 	}
@@ -67,9 +58,6 @@ public class Page {
 		return total;
 	}
 
-	public void setTotal(long total) {
-		this.total = total;
-	}
-    
+	   
 	
 }

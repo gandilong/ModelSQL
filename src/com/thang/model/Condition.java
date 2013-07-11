@@ -1,10 +1,11 @@
 package com.thang.model;
 
 
+import com.thang.executor.DBExecutor;
 import com.thang.model.mate.MateType;
-import com.thang.utils.db.ConnectionUtils;
 import com.thang.utils.reflect.ModelUtils;
 import java.lang.reflect.Field;
+import org.apache.commons.lang.StringUtils;
 
 public class Condition {
 
@@ -16,24 +17,22 @@ public class Condition {
 	
 	private String orderBy="ID";
 	private String order="DESC";
+        
+        private  String database=null;//数据库类型 mysql ,oracle,sqlserver
 	
 	public Condition(Class<?> cls){
 		model=cls;
 		cdtion=new StringBuilder();
 	}
 	
-	public Condition(Class<?> cls,boolean toPage){
-		if(toPage){
-			page=new Page(cls);	
-		}
+	public Condition(Class<?> cls,Page page){
+		this.page=page;	
 		model=cls;
 		cdtion=new StringBuilder();
 	}
 	
-	public Condition(Object pojo,boolean toPage){
-		if(toPage){
-			page=new Page(pojo.getClass());	
-		}
+	public Condition(Object pojo,Page page){
+                this.page=page;	
 		model=pojo.getClass();
 		cdtion=new StringBuilder();
 	}
@@ -72,13 +71,29 @@ public class Condition {
 		    cdtion.append(" (");
 		    cdtion.append(ModelUtils.getColumnName(model.getDeclaredField(fieldName)));
 		    cdtion.append(link.value());
-		    if(ModelUtils.isNumber(model.getDeclaredField(fieldName))){
-			    cdtion.append(fieldValue);	
-		    }else{
+                    
+                    if("IN".equals(link.value().trim())){
+                          cdtion.append("(");
+                          cdtion.append(fieldValue);
+                          cdtion.append(")");
+                    }else if("NOT IN".equals(link.value().trim())){
+                          cdtion.append("(");
+                          cdtion.append(fieldValue);
+                          cdtion.append(")");
+                    }else if("LIKE".equals(link.value().trim())){
+                          cdtion.append("'%");
+                          cdtion.append(fieldValue);
+                          cdtion.append("%'");
+                    }else{
+                    
+		        if(ModelUtils.isNumber(model.getDeclaredField(fieldName))){
+			       cdtion.append(fieldValue);	
+		        }else{
 			    cdtion.append("'");
 			    cdtion.append(fieldValue);
 			    cdtion.append("'");
-		    }
+		        }
+                    }
 		    cdtion.append(") ");
 	    }catch(Exception e){
 		    e.printStackTrace();
@@ -148,8 +163,13 @@ public class Condition {
 		return this;
 	}
 
-	public Condition in(String fieldName, String[] fieldValues) throws SecurityException, NoSuchFieldException {
-		addCondition(fieldName,Link.IN,join(fieldValues,ModelUtils.isNumber(model.getDeclaredField(fieldName))));
+	public Condition in(String fieldName, Object[] fieldValues) {
+            try{
+                String[] values=StringUtils.join(fieldValues,",").split(",");
+		addCondition(fieldName,Link.IN,join(values,ModelUtils.isNumber(model.getDeclaredField(fieldName))));
+            }catch(Exception e){
+                e.printStackTrace();
+            }
 		return this;
 	}
 	
@@ -163,8 +183,14 @@ public class Condition {
 		return this;
 	}
 
-	public void notIn(String fieldName, String[] fieldValues) throws SecurityException, NoSuchFieldException {
-		addCondition(fieldName,Link.NOT_IN,join(fieldValues,ModelUtils.isNumber(model.getDeclaredField(fieldName))));
+	public Condition notIn(String fieldName, Object[] fieldValues) {
+            try{
+                String[] values=StringUtils.join(fieldValues,",").split(",");
+		addCondition(fieldName,Link.NOT_IN,join(values,ModelUtils.isNumber(model.getDeclaredField(fieldName))));
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return this;
 	}
 	
 	public String join(String[] values,boolean isNumber){
@@ -193,23 +219,29 @@ public class Condition {
 
 	public StringBuilder getCdtion() {
 		
-		if(cdtion.length()==0){
+		if(cdtion.toString().trim().length()<=0){
 			cdtion.append(" 1=1 ");
 		}
 		
-		cdtion.append(" \nORDER BY ");
+		cdtion.append(" \n           ORDER BY ");
 		cdtion.append(getOrderBy());
 		cdtion.append(" ");
 		cdtion.append(getOrder());
 		cdtion.append(" ");
 		
-		if(null!=page&&"mysql".equalsIgnoreCase(ConnectionUtils.getDatabase())){
-			cdtion.append(" LIMIT ");
+                if(null!=page){
+                    if("mysql".equalsIgnoreCase(getDatabase())){
+                        cdtion.append(" LIMIT ");
 			cdtion.append(page.getPageNow()==1?0:(page.getPageNow()-1)*page.getPageSize());
 			cdtion.append(",");
 			cdtion.append(page.getPageNow()*page.getPageSize());
-		}
-		
+                    }else if("oracle".equalsIgnoreCase(getDatabase())){
+                        
+                    }else if("sqlserver".equalsIgnoreCase(getDatabase())){
+                    
+                    }
+                }
+			
 		return cdtion;
 	}
 
@@ -235,6 +267,26 @@ public class Condition {
 	public Page getPage() {
 		return page;
 	}
+
+    public String getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
+    }
+
+        
+        
+    @Override
+    public String toString() {
+        if(cdtion.toString().trim().length()<=0){
+            return " 1=1 ";
+        }
+        return cdtion.toString();
+    }
+        
+        
 
 	
 }

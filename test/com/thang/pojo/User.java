@@ -1,94 +1,121 @@
 package com.thang.pojo;
 
-import com.thang.model.mate.Column;
 import com.thang.model.mate.Table;
 
 /**
  * @author gandilong
  */
-@Table("sys_user_info")
+@Table("sys_users")
 public class User {
 
-	private Integer id;
+	private long id;
 	
-	@Column("user_name")
-	private String userName;
+	private String name;
 	
-	@Column("login_name")
-	private String loginName;
-	
-	@Column("login_pass")
-	private String loginPass;
-	
-	private String birth;
-	private String image;//头像
-	private String sex;//0 girl, 1 boy
-	
-	private String dept;//部门
-	private String opt;//备注
-	
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
-	public String getUserName() {
-		return userName;
-	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-	public String getLoginName() {
-		return loginName;
-	}
-	public void setLoginName(String loginName) {
-		this.loginName = loginName;
-	}
-	public String getLoginPass() {
-		return loginPass;
-	}
-	public void setLoginPass(String loginPass) {
-		this.loginPass = loginPass;
-	}
-	public String getBirth() {
-		return birth;
-	}
-	public void setBirth(String birth) {
-		this.birth = birth;
-	}
-	public String getImage() {
-		return image;
-	}
-	public void setImage(String image) {
-		this.image = image;
-	}
-	public String getSex() {
-		return sex;
-	}
-	public void setSex(String sex) {
-		this.sex = sex;
-	}
 	 
-	public String getDept() {
-		return dept;
-	}
-	public void setDept(String dept) {
-		this.dept = dept;
-	}
-	public String getOpt() {
-		return opt;
-	}
-	public void setOpt(String opt) {
-		this.opt = opt;
-	}
-	@Override
-	public String toString() {
-		return "User [id=" + id + ", userName=" + userName + ", loginName="
-				+ loginName + ", loginPass=" + loginPass + ", birth=" + birth
-				+ ", image=" + image + ", sex=" + sex + ", dept=" + dept
-				+ ", opt=" + opt + "]";
-	}
+	private String descn;
+	
+	 
+	private String loginid;
+	
+	private String passwd;
+	private String email;
+        private String region;
+	
+	private String status;
+        private String unitId;
+        private String phone;
+        private String isAutoAudit;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescn() {
+        return descn;
+    }
+
+    public void setDescn(String descn) {
+        this.descn = descn;
+    }
+
+    public String getLoginid() {
+        return loginid;
+    }
+
+    public void setLoginid(String loginid) {
+        this.loginid = loginid;
+    }
+
+    public String getPasswd() {
+        return passwd;
+    }
+
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getUnitId() {
+        return unitId;
+    }
+
+    public void setUnitId(String unitId) {
+        this.unitId = unitId;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getIsAutoAudit() {
+        return isAutoAudit;
+    }
+
+    public void setIsAutoAudit(String isAutoAudit) {
+        this.isAutoAudit = isAutoAudit;
+    }
+	
+	
 	
 	
 	

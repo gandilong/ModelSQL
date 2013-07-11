@@ -9,7 +9,7 @@ public enum Link {
 	LESS_EQUAL("<="),
 	GRATE_EQUAL(">="),
 	IN(" IN "),
-	LIKE(" LIKE"),
+	LIKE(" LIKE "),
 	NOT_IN(" NOT IN ");
 	
 	private String value="=";

@@ -17,21 +17,82 @@ import com.thang.model.Condition;
 import com.thang.model.Model;
 import com.thang.model.sql.SQLGener;
 import com.thang.processor.ModelProcessor;
-import com.thang.utils.db.ConnectionUtils;
 import com.thang.utils.reflect.ModelUtils;
+import java.math.BigDecimal;
+import org.apache.commons.dbcp.BasicDataSourceFactory;
+import org.apache.commons.dbutils.DbUtils;
+import java.util.Properties;
 
 public class DBExecutor {
 
-	private static DataSource dataSource=ConnectionUtils.getDataSource();
-	private static QueryRunner queryRunner=new QueryRunner(dataSource);
-	
-	public DBExecutor(){}
+	private  DataSource dataSource=null;//ConnectionUtils.getDataSource();
+	private  QueryRunner queryRunner=null;//new QueryRunner(dataSource);
+	private  String database=null;//数据库类型 mysql ,oracle,sqlserver
+        
+        public DBExecutor(){}
+        
+        /**
+         * @param ds 数据源
+         * @param database 数据库类型，mysql,oracle,sqlserver
+         */
+	public DBExecutor(DataSource ds,String database){
+             this.dataSource=ds;
+             this.queryRunner=new QueryRunner(ds);
+             setDatabase(database);
+        }
+        
+        public DBExecutor(String driverClassName,String url,String username,String password,String database){
+            try{
+                DbUtils.loadDriver(driverClassName);
+                Properties pros=new Properties();
+                pros.setProperty("driverClassName",driverClassName );
+                pros.setProperty("url",url );
+                pros.setProperty("username",username);
+                pros.setProperty("password",password );
+            
+                this.dataSource=BasicDataSourceFactory.createDataSource(pros);
+                this.queryRunner=new QueryRunner(this.dataSource);
+                setDatabase(database);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
 
-	
-	public long num(Class<?> model){
-		long total=0;
+	/**
+         * 查某张表的数据量
+         * @param model
+         * @return 
+         */
+	public long count(Class<?> model){
+		Object total=null;
 		try{
-		    total=queryRunner.query("select count(*) from "+ModelUtils.getTableName(model),new ScalarHandler<Long>());
+		    total=queryRunner.query("select count(*) from "+ModelUtils.getTableName(model),new ScalarHandler<Object>());
+                    if(total.getClass()==BigDecimal.class){
+                        return ((BigDecimal)total).longValue();
+                    }else if(total.getClass()==Long.class){
+                        return (Long)total;
+                    }
+		}catch(Exception e){
+		    e.printStackTrace();
+		}
+		return 0;
+	}
+        
+        /**
+         * 查某张表的数据量
+         * @param model
+         * @return 
+         */    
+        public Long count(Class<?> model,Condition cnd){
+		Long total=null;
+                cnd.setDatabase(this.database);
+		try{
+		    Object obj=queryRunner.query(SQLGener.CountSQL(new Model(model),cnd),new ScalarHandler<Object>());
+                    if(obj.getClass()==BigDecimal.class){
+                        return ((BigDecimal)obj).longValue();
+                    }else if(obj.getClass()==Long.class){
+                        return (Long)obj;
+                    }
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -96,6 +157,22 @@ public class DBExecutor {
 	    	}
 	    	return null;
 	 }
+        
+        /**
+	 * 得到列对象集合
+	 */
+	public List<Object> columns(Class<?> cls,String fieldName,Condition condition){
+	    	try{
+                    condition.setDatabase(this.database);
+                    if(0==condition.getPage().getTotal()){
+                        condition.getPage().setTotal(count(cls,condition).longValue());
+                    }
+	    	    return queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition), new ColumnListHandler<Object>(fieldName));
+	    	}catch(Exception e){
+	    		e.printStackTrace();
+	    	}
+	    	return null;
+	 }
 	
 	
 	public Map<String,Object> map(Class<?> cls,long id){
@@ -150,10 +227,14 @@ public class DBExecutor {
 	 */
 	public List<Map<String,Object>> maps(Class<?> cls,Condition condition){
 	    try{
+                condition.setDatabase(this.database);
+                 if(0==condition.getPage().getTotal()){
+                        condition.getPage().setTotal(count(cls,condition).longValue());
+                    }
 	    	return queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition),new MapListHandler(ModelProcessor.getInstance()));
-		}catch(Exception e){
+	    }catch(Exception e){
 			e.printStackTrace();
-		}
+	    }
 		return null;
 	}
 	 
@@ -214,11 +295,11 @@ public class DBExecutor {
      *判断ID字段是否有值，来进行操作
      */
 	public void insertOrUpdate(Object obj){
-        if(ModelUtils.idValid(obj)){
+             if(ModelUtils.idValid(obj)){
         	update(obj);
-        }else{
+             }else{
         	insert(obj);
-        }
+             }
 	}
 	
 	/**
@@ -289,11 +370,15 @@ public class DBExecutor {
 	public <T>List<T> list(Class<T> cls,Condition condition){
 	    List<T> result=null;
 	    try{
+                condition.setDatabase(this.database);
+                 if(null!=condition&&null!=condition.getPage()&&0==condition.getPage().getTotal()){
+                        condition.getPage().setTotal(this.count(cls, condition));
+                    }
 	    	result=(List<T>)queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
-		}catch(Exception e){
+	    }catch(Exception e){
 			e.printStackTrace();
-		}
-		return result;
+	    }
+	    return result;
 	}
 	
 	/**
@@ -351,12 +436,22 @@ public class DBExecutor {
 		}
 	}
 
-	public static DataSource getDataSource() {
-		return dataSource;
+	public DataSource getDataSource() {
+		return this.dataSource;
 	}
 
-	public static void setDataSource(DataSource dataSource) {
-		DBExecutor.dataSource = dataSource;
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
 	}
+
+    public  String getDatabase() {
+        return database;
+    }
+
+    public  void setDatabase(String database) {
+        this.database = database;
+    }
+        
+       
 	
 }

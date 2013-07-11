@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSourceFactory;
 import org.apache.commons.dbutils.DbUtils;
 
+@Deprecated
 public class ConnectionUtils {
 
 	private static String database=null;
