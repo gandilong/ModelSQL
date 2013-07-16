@@ -1,10 +1,14 @@
 package com.thang.executor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbcp.BasicDataSourceFactory;
+import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -18,10 +22,6 @@ import com.thang.model.Model;
 import com.thang.model.sql.SQLGener;
 import com.thang.processor.ModelProcessor;
 import com.thang.utils.reflect.ModelUtils;
-import java.math.BigDecimal;
-import org.apache.commons.dbcp.BasicDataSourceFactory;
-import org.apache.commons.dbutils.DbUtils;
-import java.util.Properties;
 
 public class DBExecutor {
 
@@ -118,14 +118,8 @@ public class DBExecutor {
 	 * @param id
 	 * @return
 	 */
-	public Object column(Class<?> cls,String fieldName,long id){
-    	try{
-    		Model model=new Model(cls);
-    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"="+id, new ColumnListHandler<Object>(fieldName));
-    	}catch(Exception e){
-    		e.printStackTrace();
-    	}
-    	return null;
+	public String column(Class<?> cls,String fieldName,long id){
+    	return column(cls,fieldName,String.valueOf(id));
     }
 	
 	/**
@@ -135,10 +129,13 @@ public class DBExecutor {
 	 * @param id
 	 * @return
 	 */
-	public Object column(Class<?> cls,String fieldName,String id){
+	public String column(Class<?> cls,String fieldName,String id){
 	    	try{
 	    		Model model=new Model(cls);
-	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"='"+id+"'", new ColumnListHandler<Object>(fieldName));
+	    		List<String> result=queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"='"+id+"'", new ColumnListHandler<String>(fieldName));
+	    		if(null!=result&&result.size()>0){
+	    			return result.get(0);
+	    		}
 	    	}catch(Exception e){
 	    		e.printStackTrace();
 	    	}
@@ -148,10 +145,10 @@ public class DBExecutor {
 	/**
 	 * 得到列对象集合
 	 */
-	public List<Object> columns(Class<?> cls,String fieldName){
+	public List<String> columns(Class<?> cls,String fieldName){
 	    	try{
 	    		Model model=new Model(cls);
-	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName(), new ColumnListHandler<Object>(fieldName));
+	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName(), new ColumnListHandler<String>(fieldName));
 	    	}catch(Exception e){
 	    		e.printStackTrace();
 	    	}
@@ -161,13 +158,13 @@ public class DBExecutor {
         /**
 	 * 得到列对象集合
 	 */
-	public List<Object> columns(Class<?> cls,String fieldName,Condition condition){
+	public List<String> columns(Class<?> cls,String fieldName,Condition condition){
 	    	try{
                     condition.setDatabase(this.database);
                     if(0==condition.getPage().getTotal()){
                         condition.getPage().setTotal(count(cls,condition).longValue());
                     }
-	    	    return queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition), new ColumnListHandler<Object>(fieldName));
+	    	    return queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition), new ColumnListHandler<String>(fieldName));
 	    	}catch(Exception e){
 	    		e.printStackTrace();
 	    	}
