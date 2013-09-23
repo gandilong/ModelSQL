@@ -4,7 +4,7 @@ package com.thang.pojo;
 import com.thang.model.mate.Table;
 
 
-@Table("sys_role_info")
+@Table("sys_role")
 public class Role {
 
 	private String id;

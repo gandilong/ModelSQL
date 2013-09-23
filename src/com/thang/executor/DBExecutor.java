@@ -20,6 +20,7 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 import com.thang.model.Condition;
 import com.thang.model.SQLModel;
 import com.thang.model.sql.SQLGener;
+import com.thang.pojo.User;
 import com.thang.processor.ModelProcessor;
 import com.thang.utils.reflect.ModelUtils;
 
@@ -29,17 +30,17 @@ public class DBExecutor {
 	private  QueryRunner queryRunner=null;//new QueryRunner(dataSource);
 	private  String database=null;//数据库类型 mysql ,oracle,sqlserver
         
-        public DBExecutor(){}
+    public DBExecutor(){}
         
         /**
          * @param ds 数据源
          * @param database 数据库类型，mysql,oracle,sqlserver
          */
-	    public DBExecutor(DataSource ds,String database){
-             this.dataSource=ds;
-             this.queryRunner=new QueryRunner(ds);
-             setDatabase(database);
-        }
+	public DBExecutor(DataSource ds,String database){
+          this.dataSource=ds;
+          this.queryRunner=new QueryRunner(ds);
+          setDatabase(database);
+    }
         
 	    /**
 	     * 自己配置数据源
@@ -110,7 +111,7 @@ public class DBExecutor {
 	 * 执行sql语句
 	 * @param sql
 	 */
-	public void execute(String sql){
+	public void update(String sql){
 		try{
 		    queryRunner.update(sql);
 		}catch(Exception e){
@@ -139,7 +140,8 @@ public class DBExecutor {
 	public String column(Class<?> cls,String fieldName,String id){
 	    	try{
 	    		SQLModel model=new SQLModel(cls);
-	    		List<String> result=queryRunner.query("SELECT "+model.getMField(fieldName).getColumnName()+" FROM "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"='"+id+"'", new ColumnListHandler<String>(fieldName));
+	    		String column=model.getMField(fieldName).getColumnName();
+	    		List<String> result=queryRunner.query("SELECT "+column+" FROM "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"='"+id+"'", new ColumnListHandler<String>(column));
 	    		if(null!=result&&result.size()>0){
 	    			return result.get(0);
 	    		}
@@ -155,24 +157,15 @@ public class DBExecutor {
 	public List<String> columns(Class<?> cls,String fieldName){
 	    	try{
 	    		SQLModel model=new SQLModel(cls);
-	    		return queryRunner.query("SELECT "+model.getMField(fieldName).getColumnName()+" FROM "+model.getTableName(), new ColumnListHandler<String>(fieldName));
+	    		String column=model.getMField(fieldName).getColumnName();
+	    		return queryRunner.query("SELECT "+column+" FROM "+model.getTableName(), new ColumnListHandler<String>(column));
 	    	}catch(Exception e){
 	    		e.printStackTrace();
 	    	}
 	    	return null;
 	 }
 	
-	public List<String> columns(String fieldName,Condition cnd){
-		try{
-    		SQLModel model=cnd.getModel();
-    		return queryRunner.query("SELECT "+model.getMField(fieldName).getColumnName()+" FROM "+model.getTableName(), new ColumnListHandler<String>(fieldName));
-    	}catch(Exception e){
-    		e.printStackTrace();
-    	}
-    	return null;
-	}
-        
-        /**
+    /**
 	 * 得到列对象集合
 	 */
 	public List<String> columns(String sql){
@@ -184,98 +177,7 @@ public class DBExecutor {
 	    	return null;
 	 }
 	
-	
-	public Map<String,Object> map(Class<?> cls,long id){
-		try{
-			  return queryRunner.query(SQLGener.SimpleSelectSQL(new SQLModel(cls,id)), new MapHandler(ModelProcessor.getInstance()));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public Map<String,Object> map(Class<?> cls,String id){
-		try{
-			  return queryRunner.query(SQLGener.SimpleSelectSQL(new SQLModel(cls,id)), new MapHandler(ModelProcessor.getInstance()));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public List<Map<String,Object>> maps(Class<?> cls){//default is id desc
-		 try{
-		   	return queryRunner.query(SQLGener.SelectSQL(new SQLModel(cls)),new MapListHandler(ModelProcessor.getInstance()));
-		 }catch(Exception e){
-		 	e.printStackTrace();
-		 }
-		 return null;
-	}
-	
-	public List<Map<String,Object>> mapsDesc(Class<?> cls,String fieldNames){
-		 try{
-		   	return queryRunner.query(SQLGener.SelectDescSQL(new SQLModel(cls),fieldNames),new MapListHandler(ModelProcessor.getInstance()));
-		 }catch(Exception e){
-		 	e.printStackTrace();
-		 }
-		 return null;
-	}
-	
-	public List<Map<String,Object>> mapsAsc(Class<?> cls,String fieldNames){
-		 try{
-		   	return queryRunner.query(SQLGener.SelectAscSQL(new SQLModel(cls),fieldNames),new MapListHandler(ModelProcessor.getInstance()));
-		 }catch(Exception e){
-		 	e.printStackTrace();
-		 }
-		 return null;
-	}
-	
-	/**
-	 * 根据condition对象进行分布查询。
-	 * @param page
-	 * @return
-	 */
-	public List<Map<String,Object>> maps(Condition condition){
-	    try{
-	    	String sql=SQLGener.SelectConditionSQL(condition);
-                 if(condition.isHasPages()&&0==condition.getPage().getTotal()){
-                      condition.getPage().setTotal(count("SELECT COUNT(*) FROM ("+sql+") c").longValue());
-                 }
-	    	return queryRunner.query(sql,new MapListHandler(ModelProcessor.getInstance()));
-	    }catch(Exception e){
-			e.printStackTrace();
-	    }
-		return null;
-	}
 	 
-	/**
-	 * 查询一条记录，返回用Map实例封装。
-	 * @param sql
-	 * @return
-	 */
-	public Map<String,Object> query(String sql){
-		try{
-		   return queryRunner.query(sql, new MapHandler(ModelProcessor.getInstance()));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	/**
-	 * 查询多条记录，返回用List<Map>实例封装。
-	 * @param sql
-	 * @return
-	 */
-	public List<Map<String,Object>> maps(String sql){
-		try{
-		   return queryRunner.query(sql, new MapListHandler(ModelProcessor.getInstance()));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	/**
 	 * 增加一条数据记录，如果ID为空，则根据ID类型自增ID。
 	 * @param pojo
@@ -342,7 +244,7 @@ public class DBExecutor {
 		}
 	}
 	
-	public  <T>List<T> list(Class<T> cls){//default is id desc
+	public <T>List<T> list(Class<T> cls){//default is id desc
 		 List<T> result=null;
 		 try{
 		   	result=(List<T>)queryRunner.query(SQLGener.SelectSQL(new SQLModel(cls)),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));

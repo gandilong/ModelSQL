@@ -54,7 +54,7 @@ public class StringUtils extends org.apache.commons.lang.StringUtils{
 		char[] tnames=tname.toCharArray();
 		boolean _show=false;
 		for(int i=0;i<tnames.length;i++){
-			if(!Character.isLowerCase(tnames[i])&&i>0){
+			if(Character.isUpperCase(tnames[i])&&i>0){
 				_show=true;
 			}
 			if(_show){

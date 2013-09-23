@@ -17,12 +17,11 @@ public class DBETest {
 	
 	@Before
 	public void setUp() throws Exception {
-		
+		dbe=new DBExecutor("com.mysql.jdbc.Driver","jdbc:mysql://localhost:3306/test","root","su","mysql");
 	}
 
         //@Test
 	public void testMysql() {
-            dbe=new DBExecutor("com.mysql.jdbc.Driver","jdbc:mysql://localhost:3306/test","root","su","mysql");
                Page page=new Page();
                List<Role> roles=dbe.list(new Condition(Role.class,page));
                System.out.println(page.getTotal());

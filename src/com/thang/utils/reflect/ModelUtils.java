@@ -22,7 +22,7 @@ public class ModelUtils {
 		    if(null==value){
 		    	return "";
 		    }
-		    return value;
+		    return String.valueOf(value);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -35,9 +35,9 @@ public class ModelUtils {
 	 * @param fieldName
 	 * @param value
 	 */
-	public static void setProperty(Object model,String fieldName,Object[] value){
+	public static void setProperty(Object model,String fieldName,Class<?> fieldType,Object[] value){
 		try{
-		    model.getClass().getDeclaredMethod("set"+StringUtils.headUpper(fieldName),new Class[]{Object.class}).invoke(model, value); 
+		    model.getClass().getDeclaredMethod("set"+StringUtils.headUpper(fieldName),new Class[]{fieldType}).invoke(model, value); 
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -121,9 +121,10 @@ public class ModelUtils {
 		try{
 			Field id=getPrimaryKey(model.getClass());
 		    if(isNumber(id)){
-			    setProperty(model, id.getName(), new Object[]{DateUtils.formatDate(DateUtils.getLastDatedate(),DateUtils.YYYY_MM_DD_HH_mm_ss_SS).replaceAll("[\\s|\\-|:]","")});
+		    	//如果是数值类型，则不做处理，让其自增长。
+			    //setProperty(model, id.getName(),id.getType(), new Object[]{System.currentTimeMillis()});
 		    }else{
-			    setProperty(model, id.getName(),new Object[]{UUIDUtils.getUUID()});
+			    setProperty(model, id.getName(),id.getType(),new Object[]{UUIDUtils.getUUID()});
 		    }
 		}catch(Exception e){
 			e.printStackTrace();
