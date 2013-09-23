@@ -24,7 +24,7 @@ public class DBETest {
 	public void testMysql() {
             dbe=new DBExecutor("com.mysql.jdbc.Driver","jdbc:mysql://localhost:3306/test","root","su","mysql");
                Page page=new Page();
-               List<Role> roles=dbe.list(Role.class,new Condition(Role.class,page));
+               List<Role> roles=dbe.list(new Condition(Role.class,page));
                System.out.println(page.getTotal());
                for(Role u:roles){
                    System.out.println(u.getId());
@@ -35,7 +35,7 @@ public class DBETest {
 	public void testOracle() {
               dbe=new DBExecutor("oracle.jdbc.driver.OracleDriver","jdbc:oracle:thin:@192.168.30.218:1521/pmsdb","pms","rainsoft","oracle");
                Page page=new Page();
-               List<User> users=dbe.list(User.class,new Condition(User.class,page));
+               List<User> users=dbe.list(new Condition(User.class,page));
                System.out.println(page.getTotal());
                for(User u:users){
                    System.out.println(u.getId());

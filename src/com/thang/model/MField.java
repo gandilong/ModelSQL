@@ -20,7 +20,10 @@ public class MField {
 		this.fieldName=fieldName;
 		this.columnName=columnName;
 		this.fieldType=fieldType;
-		this.fieldValue=fieldValue;
+		if(null!=fieldValue){
+			this.fieldValue=fieldValue.trim();	
+		}
+		
 		this.foreignKey=fkey;
 	}
 	

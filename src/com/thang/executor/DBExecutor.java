@@ -18,7 +18,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.thang.model.Condition;
-import com.thang.model.Model;
+import com.thang.model.SQLModel;
 import com.thang.model.sql.SQLGener;
 import com.thang.processor.ModelProcessor;
 import com.thang.utils.reflect.ModelUtils;
@@ -35,20 +35,28 @@ public class DBExecutor {
          * @param ds 数据源
          * @param database 数据库类型，mysql,oracle,sqlserver
          */
-	public DBExecutor(DataSource ds,String database){
+	    public DBExecutor(DataSource ds,String database){
              this.dataSource=ds;
              this.queryRunner=new QueryRunner(ds);
              setDatabase(database);
         }
         
-        public DBExecutor(String driverClassName,String url,String username,String password,String database){
+	    /**
+	     * 自己配置数据源
+	     * @param driverClassName
+	     * @param url
+	     * @param username
+	     * @param password
+	     * @param database
+	     */
+         public DBExecutor(String driverClassName,String url,String username,String password,String database){
             try{
                 DbUtils.loadDriver(driverClassName);
                 Properties pros=new Properties();
-                pros.setProperty("driverClassName",driverClassName );
-                pros.setProperty("url",url );
+                pros.setProperty("driverClassName",driverClassName);
+                pros.setProperty("url",url);
                 pros.setProperty("username",username);
-                pros.setProperty("password",password );
+                pros.setProperty("password",password);
             
                 this.dataSource=BasicDataSourceFactory.createDataSource(pros);
                 this.queryRunner=new QueryRunner(this.dataSource);
@@ -58,19 +66,19 @@ public class DBExecutor {
             }
         }
 
-	/**
+	    /**
          * 查某张表的数据量
          * @param model
          * @return 
          */
-	public long count(Class<?> model){
+	 public long count(Class<?> model){
 		Object total=null;
 		try{
-		    total=queryRunner.query("select count(*) from "+ModelUtils.getTableName(model),new ScalarHandler<Object>());
+		    total=queryRunner.query("SELECT COUNT(*) FROM "+ModelUtils.getTableName(model),new ScalarHandler<Object>());
                     if(total.getClass()==BigDecimal.class){
                         return ((BigDecimal)total).longValue();
-                    }else if(total.getClass()==Long.class){
-                        return (Long)total;
+                    }else{
+                    	return (Long)total;
                     }
 		}catch(Exception e){
 		    e.printStackTrace();
@@ -83,20 +91,19 @@ public class DBExecutor {
          * @param model
          * @return 
          */    
-        public Long count(Class<?> model,Condition cnd){
-		Long total=null;
-                cnd.setDatabase(this.database);
-		try{
-		    Object obj=queryRunner.query(SQLGener.CountSQL(new Model(model),cnd),new ScalarHandler<Object>());
+        public Long count(String sql){
+		       Long total=null;
+		       try{
+		           Object obj=queryRunner.query(sql,new ScalarHandler<Object>());
                     if(obj.getClass()==BigDecimal.class){
                         return ((BigDecimal)obj).longValue();
-                    }else if(obj.getClass()==Long.class){
+                    }else{
                         return (Long)obj;
                     }
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return total;
+		      }catch(Exception e){
+			      e.printStackTrace();
+		     }
+		     return total;
 	}
 	
 	/**
@@ -131,8 +138,8 @@ public class DBExecutor {
 	 */
 	public String column(Class<?> cls,String fieldName,String id){
 	    	try{
-	    		Model model=new Model(cls);
-	    		List<String> result=queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"='"+id+"'", new ColumnListHandler<String>(fieldName));
+	    		SQLModel model=new SQLModel(cls);
+	    		List<String> result=queryRunner.query("SELECT "+model.getMField(fieldName).getColumnName()+" FROM "+model.getTableName()+" WHERE "+model.getPrimaryFieldName()+"='"+id+"'", new ColumnListHandler<String>(fieldName));
 	    		if(null!=result&&result.size()>0){
 	    			return result.get(0);
 	    		}
@@ -147,24 +154,30 @@ public class DBExecutor {
 	 */
 	public List<String> columns(Class<?> cls,String fieldName){
 	    	try{
-	    		Model model=new Model(cls);
-	    		return queryRunner.query("select "+model.getMField(fieldName).getColumnName()+" from "+model.getTableName(), new ColumnListHandler<String>(fieldName));
+	    		SQLModel model=new SQLModel(cls);
+	    		return queryRunner.query("SELECT "+model.getMField(fieldName).getColumnName()+" FROM "+model.getTableName(), new ColumnListHandler<String>(fieldName));
 	    	}catch(Exception e){
 	    		e.printStackTrace();
 	    	}
 	    	return null;
 	 }
+	
+	public List<String> columns(String fieldName,Condition cnd){
+		try{
+    		SQLModel model=cnd.getModel();
+    		return queryRunner.query("SELECT "+model.getMField(fieldName).getColumnName()+" FROM "+model.getTableName(), new ColumnListHandler<String>(fieldName));
+    	}catch(Exception e){
+    		e.printStackTrace();
+    	}
+    	return null;
+	}
         
         /**
 	 * 得到列对象集合
 	 */
-	public List<String> columns(Class<?> cls,String fieldName,Condition condition){
+	public List<String> columns(String sql){
 	    	try{
-                    condition.setDatabase(this.database);
-                    if(0==condition.getPage().getTotal()){
-                        condition.getPage().setTotal(count(cls,condition).longValue());
-                    }
-	    	    return queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition), new ColumnListHandler<String>(fieldName));
+	    	    return queryRunner.query(sql, new ColumnListHandler<String>());
 	    	}catch(Exception e){
 	    		e.printStackTrace();
 	    	}
@@ -174,7 +187,7 @@ public class DBExecutor {
 	
 	public Map<String,Object> map(Class<?> cls,long id){
 		try{
-			  return queryRunner.query(SQLGener.SimpleSelectSQL(new Model(cls,id)), new MapHandler(ModelProcessor.getInstance()));
+			  return queryRunner.query(SQLGener.SimpleSelectSQL(new SQLModel(cls,id)), new MapHandler(ModelProcessor.getInstance()));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -183,7 +196,7 @@ public class DBExecutor {
 	
 	public Map<String,Object> map(Class<?> cls,String id){
 		try{
-			  return queryRunner.query(SQLGener.SimpleSelectSQL(new Model(cls,id)), new MapHandler(ModelProcessor.getInstance()));
+			  return queryRunner.query(SQLGener.SimpleSelectSQL(new SQLModel(cls,id)), new MapHandler(ModelProcessor.getInstance()));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -192,7 +205,7 @@ public class DBExecutor {
 	
 	public List<Map<String,Object>> maps(Class<?> cls){//default is id desc
 		 try{
-		   	return queryRunner.query(SQLGener.SelectSQL(new Model(cls)),new MapListHandler(ModelProcessor.getInstance()));
+		   	return queryRunner.query(SQLGener.SelectSQL(new SQLModel(cls)),new MapListHandler(ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -201,7 +214,7 @@ public class DBExecutor {
 	
 	public List<Map<String,Object>> mapsDesc(Class<?> cls,String fieldNames){
 		 try{
-		   	return queryRunner.query(SQLGener.SelectDescSQL(new Model(cls),fieldNames),new MapListHandler(ModelProcessor.getInstance()));
+		   	return queryRunner.query(SQLGener.SelectDescSQL(new SQLModel(cls),fieldNames),new MapListHandler(ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -210,7 +223,7 @@ public class DBExecutor {
 	
 	public List<Map<String,Object>> mapsAsc(Class<?> cls,String fieldNames){
 		 try{
-		   	return queryRunner.query(SQLGener.SelectAscSQL(new Model(cls),fieldNames),new MapListHandler(ModelProcessor.getInstance()));
+		   	return queryRunner.query(SQLGener.SelectAscSQL(new SQLModel(cls),fieldNames),new MapListHandler(ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -222,13 +235,13 @@ public class DBExecutor {
 	 * @param page
 	 * @return
 	 */
-	public List<Map<String,Object>> maps(Class<?> cls,Condition condition){
+	public List<Map<String,Object>> maps(Condition condition){
 	    try{
-                condition.setDatabase(this.database);
-                 if(0==condition.getPage().getTotal()){
-                        condition.getPage().setTotal(count(cls,condition).longValue());
-                    }
-	    	return queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition),new MapListHandler(ModelProcessor.getInstance()));
+	    	String sql=SQLGener.SelectConditionSQL(condition);
+                 if(condition.isHasPages()&&0==condition.getPage().getTotal()){
+                      condition.getPage().setTotal(count("SELECT COUNT(*) FROM ("+sql+") c").longValue());
+                 }
+	    	return queryRunner.query(sql,new MapListHandler(ModelProcessor.getInstance()));
 	    }catch(Exception e){
 			e.printStackTrace();
 	    }
@@ -269,7 +282,7 @@ public class DBExecutor {
 	 */
 	public void insert(Object pojo){
 		try{
-		    queryRunner.update(SQLGener.InsertSQL(new Model(pojo)));
+		    queryRunner.update(SQLGener.InsertSQL(new SQLModel(pojo)));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -282,7 +295,7 @@ public class DBExecutor {
 	public void insertWidthID(Object pojo){
 		try{
 		    ModelUtils.installID(pojo);
-		    queryRunner.update(SQLGener.InsertSQL(new Model(pojo)));
+		    queryRunner.update(SQLGener.InsertSQL(new SQLModel(pojo)));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -292,11 +305,11 @@ public class DBExecutor {
      *判断ID字段是否有值，来进行操作
      */
 	public void insertOrUpdate(Object obj){
-             if(ModelUtils.idValid(obj)){
+       if(ModelUtils.idValid(obj)){
         	update(obj);
-             }else{
-        	insert(obj);
-             }
+       }else{
+         	insert(obj);
+       }
 	}
 	
 	/**
@@ -306,7 +319,7 @@ public class DBExecutor {
 	public void delete(Class<?> model,long id){
 		if(0!=id){
 			try{
-				queryRunner.update(SQLGener.DeleteSQL(new Model(model,id)));
+				queryRunner.update(SQLGener.DeleteSQL(new SQLModel(model,id)));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -322,7 +335,7 @@ public class DBExecutor {
 	public void delete(Class<?> model,String id){
 		if(null!=id&&!"".equals(id)){
 			try{
-				queryRunner.update(SQLGener.DeleteSQL(new Model(model,id)));
+				queryRunner.update(SQLGener.DeleteSQL(new SQLModel(model,id)));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -332,7 +345,7 @@ public class DBExecutor {
 	public  <T>List<T> list(Class<T> cls){//default is id desc
 		 List<T> result=null;
 		 try{
-		   	result=(List<T>)queryRunner.query(SQLGener.SelectSQL(new Model(cls)),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		   	result=(List<T>)queryRunner.query(SQLGener.SelectSQL(new SQLModel(cls)),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -342,7 +355,7 @@ public class DBExecutor {
 	public <T>List<T> listDesc(Class<T> cls,String fieldNames){
 		List<T> result=null;
 		 try{
-		   	result=(List<T>)queryRunner.query(SQLGener.SelectDescSQL(new Model(cls),fieldNames),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		   	result=(List<T>)queryRunner.query(SQLGener.SelectDescSQL(new SQLModel(cls),fieldNames),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -352,7 +365,7 @@ public class DBExecutor {
 	public <T>List<T> listAsc(Class<T> cls,String fieldNames){
 		List<T> result=null;
 		 try{
-		   	result=(List<T>)queryRunner.query(SQLGener.SelectAscSQL(new Model(cls),fieldNames),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		   	result=(List<T>)queryRunner.query(SQLGener.SelectAscSQL(new SQLModel(cls),fieldNames),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -364,14 +377,14 @@ public class DBExecutor {
 	 * @param page
 	 * @return
 	 */
-	public <T>List<T> list(Class<T> cls,Condition condition){
+	public <T>List<T> list(Condition condition){
 	    List<T> result=null;
 	    try{
-                condition.setDatabase(this.database);
+	    	String sql=SQLGener.SelectConditionSQL(condition);
                  if(null!=condition&&null!=condition.getPage()&&0==condition.getPage().getTotal()){
-                        condition.getPage().setTotal(this.count(cls, condition));
+                        condition.getPage().setTotal(count("SELECT COUNT(*) FROM ("+sql+") c"));
                     }
-	    	result=(List<T>)queryRunner.query(SQLGener.SelectConditionSQL(new Model(cls),condition),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+	    	result=(List<T>)queryRunner.query(sql,new BeanListHandler<T>((Class<T>)condition.getModelCls(),ModelProcessor.getInstance()));
 	    }catch(Exception e){
 			e.printStackTrace();
 	    }
@@ -410,7 +423,7 @@ public class DBExecutor {
 	public <T>T get(Class<T> cls,String id){
 		T result=null;
 		try{
-			result=queryRunner.query(SQLGener.SimpleSelectSQL(new Model(cls,id)), new BeanHandler<T>(cls,ModelProcessor.getInstance()));
+			result=queryRunner.query(SQLGener.SimpleSelectSQL(new SQLModel(cls,id)), new BeanHandler<T>(cls,ModelProcessor.getInstance()));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -424,7 +437,7 @@ public class DBExecutor {
 	public void update(Object pojo){
 		try{
 		    if(ModelUtils.idValid(pojo)){//实体ID值必须有效
-		    	queryRunner.update(SQLGener.UpdateSQL(new Model(pojo)));
+		    	queryRunner.update(SQLGener.UpdateSQL(new SQLModel(pojo)));
 		    }else{
 		    	System.out.println("无效ID！");
 		    }
@@ -447,6 +460,7 @@ public class DBExecutor {
 
     public  void setDatabase(String database) {
         this.database = database;
+        Condition.setDatabase(database);
     }
         
        

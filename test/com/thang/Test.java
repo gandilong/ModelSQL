@@ -4,14 +4,11 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 
-import com.thang.executor.DBExecutor;
-import com.thang.model.Condition;
-import com.thang.pojo.User;
 import com.thang.utils.db.ConnectionUtils;
+
 
 public class Test {
 

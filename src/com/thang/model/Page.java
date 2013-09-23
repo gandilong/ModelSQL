@@ -1,6 +1,5 @@
 package com.thang.model;
 
-import com.thang.executor.DBExecutor;
 
 public class Page {
 	private long pageNum=0;//总页数
@@ -12,13 +11,18 @@ public class Page {
 	public Page(){}
 	
 	public Page(long pageNow) {
+		if(pageNow<=0){
+			this.pageNow=1;
+		}
 		this.pageNow = pageNow;
 	}
 	
 	public Page(long pageNow, long pageSize,Class<?> model) {
+		if(pageNow<=0){
+			this.pageNow=1;
+		}
 		this.pageNow = pageNow;
 		this.pageSize = pageSize;
-		
 	}
 	
 	

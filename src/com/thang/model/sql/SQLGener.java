@@ -1,11 +1,9 @@
 package com.thang.model.sql;
 
 import com.thang.exception.NullFieldException;
-import com.thang.executor.DBExecutor;
 import com.thang.model.Condition;
 import com.thang.model.MField;
-import com.thang.model.Model;
-import com.thang.utils.db.ConnectionUtils;
+import com.thang.model.SQLModel;
 import com.thang.utils.lang.StringUtils;
 
 /**
@@ -15,48 +13,67 @@ import com.thang.utils.lang.StringUtils;
  */
 public class SQLGener {
 	
-	public static String InsertSQL(Model model){
+	
+	
+	/**
+	 * 新增语句
+	 * @param model
+	 * @return
+	 */
+	public static String InsertSQL(SQLModel model){
 		return StringUtils.println(GenerInsertSQL(model));
 	}
 	
-	public static String DeleteSQL(Model model){
+	/**
+	 * 删除语句
+	 * @param model
+	 * @return
+	 */
+	public static String DeleteSQL(SQLModel model){
 		return StringUtils.println(GenerDeleteSQL(model));
 	}
 	
-	public static String SelectSQL(Model model){
+	/**
+	 * 更新语句
+	 * @param model
+	 * @return
+	 */
+	public static String UpdateSQL(SQLModel model){
+		return StringUtils.println(GenerUpdateSQL(model));
+	}
+	
+	public static String SelectSQL(SQLModel model){
 		return StringUtils.println(GenerSelectSQL(model));
 	}
 	
-	public static String SelectDescSQL(Model model,String fieldNames){
+	public static String SelectDescSQL(SQLModel model,String fieldNames){
 		return StringUtils.println(GenerSelectDescSQL(model,fieldNames));
 	}
 	
-	public static String SelectAscSQL(Model model,String fieldNames){
+	public static String SelectAscSQL(SQLModel model,String fieldNames){
 		return StringUtils.println(GenerSelectAscSQL(model,fieldNames));
 	}
 	
-	public static String SelectConditionSQL(Model model,Condition condition){
-		return StringUtils.println(GenerSelectConditioncSQL(model,condition));
+	public static String SelectConditionSQL(Condition condition){
+		return StringUtils.println(GenerSelectConditioncSQL(condition.getModel(),condition));
 	}
 	
-	public static String CountSQL(Model model,Condition condition){
+	public static String CountSQL(SQLModel model,Condition condition){
 		return StringUtils.println(countSQL(model,condition));
 	}
 	
-	public static String SimpleSelectSQL(Model model){
+	public static String SimpleSelectSQL(SQLModel model){
 		return StringUtils.println(GenerSimpleSelectSQL(model));
 	}
 	
-	public static String UpdateSQL(Model model){
-		return StringUtils.println(GenerUpdateSQL(model));
-	}
+	
 	
 	/**
 	 * 专门生成insert语句
 	 * @param model
 	 * @return
 	 */
-	public static String GenerInsertSQL(Model model){
+	public static String GenerInsertSQL(SQLModel model){
 		StringBuilder sber=new StringBuilder();
 		String[] columnNames=model.getColumnNames();
 		if(null!=model){
@@ -94,7 +111,7 @@ public class SQLGener {
 	 * @param model
 	 * @return
 	 */
-	public static String GenerDeleteSQL(Model model){
+	public static String GenerDeleteSQL(SQLModel model){
 		StringBuilder sber=new StringBuilder();
 		if(null!=model){
 			sber.append(" DELETE FROM ");
@@ -119,7 +136,7 @@ public class SQLGener {
 	 * @param model
 	 * @return
 	 */
-	public static String GenerUpdateSQL(Model model){
+	public static String GenerUpdateSQL(SQLModel model){
 		StringBuilder sber=new StringBuilder();
 		String[] columnNames=model.getColumnNames();
 		if(null!=model){
@@ -172,7 +189,7 @@ public class SQLGener {
 		return sber.toString();
 	}
 	
-	public static String GenerSimpleSelectSQL(Model model){
+	public static String GenerSimpleSelectSQL(SQLModel model){
 		StringBuilder sber=new StringBuilder();
 		String[] columnNames=model.getColumnNames();
 		
@@ -199,7 +216,7 @@ public class SQLGener {
 		return sber.toString();
 	}
 	
-	public static String GenerSelectSQL(Model model){
+	public static String GenerSelectSQL(SQLModel model){
 		StringBuilder sber=new StringBuilder();
         String[] columnNames=model.getColumnNames();
 		
@@ -213,7 +230,7 @@ public class SQLGener {
 		return sber.toString();
 	}
 	
-	public static String GenerSelectDescSQL(Model model,String fieldNames){//多个字段之间要加逗号
+	public static String GenerSelectDescSQL(SQLModel model,String fieldNames){//多个字段之间要加逗号
 		StringBuilder sber=new StringBuilder();
         String[] columnNames=model.getColumnNames();
         StringBuilder orderby=new StringBuilder();
@@ -237,7 +254,7 @@ public class SQLGener {
 		return sber.toString();
 	}
 	
-	public static String GenerSelectAscSQL(Model model,String fieldNames){//多个字段之间要加逗号
+	public static String GenerSelectAscSQL(SQLModel model,String fieldNames){//多个字段之间要加逗号
 		StringBuilder sber=new StringBuilder();
         String[] columnNames=model.getColumnNames();
         StringBuilder orderby=new StringBuilder();
@@ -262,7 +279,7 @@ public class SQLGener {
 		return sber.toString();
 	}
 	
-	public static String GenerSelectConditioncSQL(Model model,Condition cd){//多个字段之间要加逗号
+	public static String GenerSelectConditioncSQL(SQLModel model,Condition cd){//多个字段之间要加逗号
 		StringBuilder sber=new StringBuilder();
                 String[] columnNames=model.getColumnNames();
                 
@@ -290,7 +307,7 @@ public class SQLGener {
 		return sber.toString();
 	}
 	
-	public static String countSQL(Model model,Condition condition){
+	public static String countSQL(SQLModel model,Condition condition){
 		StringBuilder sber=new StringBuilder();
                 String[] columnNames=model.getColumnNames();
                 sber.append("SELECT COUNT(*) FROM (");
