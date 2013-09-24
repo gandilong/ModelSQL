@@ -9,9 +9,8 @@ public class UpdateSQL {
 
 	private static StringBuffer sber=new StringBuffer();
 	
-	public static String GenUpdateSQL(Object obj){
+	public static String genUpdateSQL(SQLModel model){
 		String result=null;
-		SQLModel model=new SQLModel(obj);
 		String[] columnNames=model.getColumnNames();
 		if(null!=model){
 			sber.append("UPDATE ");

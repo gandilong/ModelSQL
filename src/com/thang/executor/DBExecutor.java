@@ -2,7 +2,6 @@ package com.thang.executor;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -13,14 +12,13 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
-import org.apache.commons.dbutils.handlers.MapHandler;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
-import com.thang.model.Condition;
+import com.thang.framework.DeleteSQL;
+import com.thang.framework.InsertSQL;
+import com.thang.framework.SelectSQL;
+import com.thang.framework.UpdateSQL;
 import com.thang.model.SQLModel;
-import com.thang.model.sql.SQLGener;
-import com.thang.pojo.User;
 import com.thang.processor.ModelProcessor;
 import com.thang.utils.reflect.ModelUtils;
 
@@ -28,7 +26,7 @@ public class DBExecutor {
 
 	private  DataSource dataSource=null;//ConnectionUtils.getDataSource();
 	private  QueryRunner queryRunner=null;//new QueryRunner(dataSource);
-	private  String database=null;//数据库类型 mysql ,oracle,sqlserver
+	private  static String database=null;//数据库类型 mysql ,oracle,sqlserver
         
     public DBExecutor(){}
         
@@ -108,7 +106,7 @@ public class DBExecutor {
 	}
 	
 	/**
-	 * 执行sql语句
+	 * 执行insert,update,delete语句
 	 * @param sql
 	 */
 	public void update(String sql){
@@ -184,7 +182,7 @@ public class DBExecutor {
 	 */
 	public void insert(Object pojo){
 		try{
-		    queryRunner.update(SQLGener.InsertSQL(new SQLModel(pojo)));
+		    queryRunner.update(InsertSQL.genInsertSQL(new SQLModel(pojo)));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -194,10 +192,10 @@ public class DBExecutor {
 	 * 增加一条数据记录，如果ID为空，则根据ID类型自增ID。
 	 * @param pojo
 	 */
-	public void insertWidthID(Object pojo){
+	public void insertWidthID(Object obj){
 		try{
-		    ModelUtils.installID(pojo);
-		    queryRunner.update(SQLGener.InsertSQL(new SQLModel(pojo)));
+		    ModelUtils.installID(obj);
+		    queryRunner.update(InsertSQL.genInsertSQL(new SQLModel(obj)));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -218,10 +216,10 @@ public class DBExecutor {
 	 * 根据整数ID删除数据。
 	 * @param id
 	 */
-	public void delete(Class<?> model,long id){
+	public void delete(Class<?> cls,long id){
 		if(0!=id){
 			try{
-				queryRunner.update(SQLGener.DeleteSQL(new SQLModel(model,id)));
+				queryRunner.update(DeleteSQL.genDeleteSQL(cls,id));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -234,10 +232,10 @@ public class DBExecutor {
 	 * 根据字符串ID删除数据。
 	 * @param id
 	 */
-	public void delete(Class<?> model,String id){
+	public void delete(Class<?> cls,String id){
 		if(null!=id&&!"".equals(id)){
 			try{
-				queryRunner.update(SQLGener.DeleteSQL(new SQLModel(model,id)));
+				queryRunner.update(DeleteSQL.genDeleteSQL(cls, id));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -247,7 +245,7 @@ public class DBExecutor {
 	public <T>List<T> list(Class<T> cls){//default is id desc
 		 List<T> result=null;
 		 try{
-		   	result=(List<T>)queryRunner.query(SQLGener.SelectSQL(new SQLModel(cls)),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		   	result=(List<T>)queryRunner.query(SelectSQL.genSelectSQL(cls),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -257,7 +255,7 @@ public class DBExecutor {
 	public <T>List<T> listDesc(Class<T> cls,String fieldNames){
 		List<T> result=null;
 		 try{
-		   	result=(List<T>)queryRunner.query(SQLGener.SelectDescSQL(new SQLModel(cls),fieldNames),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		   	result=(List<T>)queryRunner.query(SelectSQL.genSelectSQL(cls,fieldNames,"desc"),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -267,7 +265,7 @@ public class DBExecutor {
 	public <T>List<T> listAsc(Class<T> cls,String fieldNames){
 		List<T> result=null;
 		 try{
-		   	result=(List<T>)queryRunner.query(SQLGener.SelectAscSQL(new SQLModel(cls),fieldNames),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
+		   	result=(List<T>)queryRunner.query(SelectSQL.genSelectSQL(cls,fieldNames,"asc"),new BeanListHandler<T>(cls,ModelProcessor.getInstance()));
 		 }catch(Exception e){
 		 	e.printStackTrace();
 		 }
@@ -279,14 +277,16 @@ public class DBExecutor {
 	 * @param page
 	 * @return
 	 */
-	public <T>List<T> list(Condition condition){
+	@SuppressWarnings("unchecked")
+	public <T>List<T> list(SQLModel model){
 	    List<T> result=null;
 	    try{
-	    	String sql=SQLGener.SelectConditionSQL(condition);
-                 if(null!=condition&&null!=condition.getPage()&&0==condition.getPage().getTotal()){
-                        condition.getPage().setTotal(count("SELECT COUNT(*) FROM ("+sql+") c"));
-                    }
-	    	result=(List<T>)queryRunner.query(sql,new BeanListHandler<T>((Class<T>)condition.getModelCls(),ModelProcessor.getInstance()));
+	    	String sql=SelectSQL.genSelectSQL(model);
+            if(model.toPage){
+               	 model.setTotal(count("SELECT COUNT(0) FROM ("+sql+") c"));
+               	 model.toPage();
+            }
+	    	result=(List<T>)queryRunner.query(sql,new BeanListHandler<T>((Class<T>)model.getModelClass(),ModelProcessor.getInstance()));
 	    }catch(Exception e){
 			e.printStackTrace();
 	    }
@@ -325,7 +325,20 @@ public class DBExecutor {
 	public <T>T get(Class<T> cls,String id){
 		T result=null;
 		try{
-			result=queryRunner.query(SQLGener.SimpleSelectSQL(new SQLModel(cls,id)), new BeanHandler<T>(cls,ModelProcessor.getInstance()));
+			SQLModel model=new SQLModel(cls,id);
+			model.getCondition().eq(model.getPrimaryFieldName(),model.getPrimaryFieldValue());
+			result=queryRunner.query(SelectSQL.genSelectSQL(model), new BeanHandler<T>(cls,ModelProcessor.getInstance()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T>T get(SQLModel model){
+		T result=null;
+		try{
+			result=queryRunner.query(SelectSQL.genSelectSQL(model), new BeanHandler<T>((Class<T>)model.getModelClass(),ModelProcessor.getInstance()));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -339,7 +352,7 @@ public class DBExecutor {
 	public void update(Object pojo){
 		try{
 		    if(ModelUtils.idValid(pojo)){//实体ID值必须有效
-		    	queryRunner.update(SQLGener.UpdateSQL(new SQLModel(pojo)));
+		    	queryRunner.update(UpdateSQL.genUpdateSQL(new SQLModel(pojo)));
 		    }else{
 		    	System.out.println("无效ID！");
 		    }
@@ -356,13 +369,12 @@ public class DBExecutor {
 		this.dataSource = dataSource;
 	}
 
-    public  String getDatabase() {
-        return database;
+    public static String getDatabase() {
+        return DBExecutor.database;
     }
 
-    public  void setDatabase(String database) {
-        this.database = database;
-        Condition.setDatabase(database);
+    private void setDatabase(String database) {
+        DBExecutor.database = database;
     }
         
        

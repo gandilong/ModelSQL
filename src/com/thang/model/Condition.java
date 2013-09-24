@@ -3,17 +3,14 @@ package com.thang.model;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
+import com.thang.utils.lang.StringUtils;
 import com.thang.utils.reflect.ModelUtils;
 
 public class Condition {
 
-	private Page page=null;
 	private Class<?> modelCls;
 	private StringBuilder sber;
 	private StringBuilder cdtion;
-	private boolean hasPages=false;
 	private boolean hasCondition=false;
 	
 	private SQLModel model=null;
@@ -21,30 +18,11 @@ public class Condition {
 	private String orderBy="ID";
 	private String order="DESC";
         
-    private static String database=null;//数据库类型 mysql ,oracle,sqlserver
-	
-	public Condition(Class<?> cls){
-		modelCls=cls;
-		model=new SQLModel(cls);
+	public Condition(SQLModel model){
+	    this.model=model;
+	    this.modelCls=model.getModelClass();
 		cdtion=new StringBuilder();
 	}
-	
-	public Condition(Class<?> cls,Page page){
-		this.page=page;	
-		modelCls=cls;
-		model=new SQLModel(cls);
-		cdtion=new StringBuilder();
-		this.hasPages=true;
-	}
-	
-	public Condition(Object pojo,Page page){
-        this.page=page;	
-		modelCls=pojo.getClass();
-		model=new SQLModel(modelCls);
-		cdtion=new StringBuilder();
-		this.hasPages=true;
-	}
-	
 	
 	/**
 	 * 核心添加条件方法
@@ -278,69 +256,29 @@ public class Condition {
 			cdtion.append(" 1=1 ");
 		}
 		
-		cdtion.append(" \n           ORDER BY ");
+		cdtion.append(" \n     ORDER BY ");
 		cdtion.append(getOrderBy());
 		cdtion.append(" ");
 		cdtion.append(getOrder());
 		cdtion.append(" ");
 		
-                if(null!=page){
-                    if("mysql".equalsIgnoreCase(getDatabase())){
-                        cdtion.append(" LIMIT ");
-			            cdtion.append(page.getPageNow()<=1?0:(page.getPageNow()-1)*page.getPageSize());
-			            cdtion.append(",");
-			            cdtion.append(page.getPageNow()<=1?page.getPageSize():page.getPageNow()*page.getPageSize());
-                    }else if("oracle".equalsIgnoreCase(getDatabase())){
-                        
-                    }else if("sqlserver".equalsIgnoreCase(getDatabase())){
-                    
-                    }
-                }
-			
 		return cdtion;
 	}
 
 	private String getOrderBy() {
 		return orderBy;
 	}
-	public Condition setOrderBy(String orderBy) {
-		this.orderBy = orderBy;
+	public Condition orderBy(String orderBy) {
+		this.orderBy = StringUtils.addUnderline(orderBy);
 		return this;
 	}
 	private String getOrder() {
 		return order;
 	}
-	public Condition setOrder(String order) {
-		this.order = order;
+	public Condition order(String order) {
+		this.order = StringUtils.addUnderline(order);
 		return this;
 	}
-
-	public void setPage(Page page) {
-		this.page = page;
-	}
-	
-	public Page getPage() {
-		return page;
-	}
-
-    public String getDatabase() {
-        return database;
-    }
-
-    public static void setDatabase(String database) {
-        Condition.database = database;
-    }
-    public boolean isHasPages() {
-		return hasPages;
-	}
-
-	@Override
-    public String toString() {
-        if(cdtion.toString().trim().length()<=0){
-            return " 1=1 ";
-        }
-        return cdtion.toString();
-    }
 
 	public SQLModel getModel() {
 		return model;
@@ -349,5 +287,15 @@ public class Condition {
 	public Class<?> getModelCls() {
 		return modelCls;
 	}
+
+
+	public void setModel(SQLModel model) {
+		this.model = model;
+	}
+	
+	@Override
+    public String toString() {
+        return getCdtion().toString();
+    }
     
 }

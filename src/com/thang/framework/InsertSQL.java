@@ -10,10 +10,8 @@ public class InsertSQL implements SQL {
 
 	private static StringBuffer sber=new StringBuffer();
 	
-	public static String GenInsertSQL(Object obj){
-		String result=null;
-		SQLModel model=new SQLModel(obj);
-		
+	public static String genInsertSQL(SQLModel model){
+		clear();
 		String[] columnNames=model.getColumnNames();
 		if(null!=model){
 			sber.append("INSERT INTO ");
@@ -43,9 +41,7 @@ public class InsertSQL implements SQL {
 			sber.append(")");
 		}
 		
-		result=sber.toString();
-		clear();
-		return result;
+		return sber.toString();
 	}
 
 

@@ -7,23 +7,8 @@ public class DeleteSQL {
 
 	private static StringBuffer sber=new StringBuffer();
 	
-	public static String GenDeleteSQL(Class<?> cls,String id){
+	public static String genDeleteSQL(Class<?> cls,String id){
 		String result=null;
-		SQLModel model=new SQLModel(cls,id);
-		
-		sber.append("DELETE FROM ");
-		sber.append(model.getTableName());
-		sber.append(" WHERE ID=");
-		sber.append(id);
-		
-		
-		result=sber.toString();
-		clear();
-		return result;
-	}
-	
-    public static String GenDeleteSQL(Class<?> cls,long id){
-    	String result=null;
 		SQLModel model=new SQLModel(cls,id);
 		
 		sber.append("DELETE FROM ");
@@ -32,11 +17,35 @@ public class DeleteSQL {
 		sber.append(id);
 		sber.append("'");
 		
+		result=sber.toString();
+		clear();
+		return result;
+	}
+	
+    public static String genDeleteSQL(Class<?> cls,long id){
+    	String result=null;
+		SQLModel model=new SQLModel(cls,id);
+		
+		sber.append("DELETE FROM ");
+		sber.append(model.getTableName());
+		sber.append(" WHERE ID=");
+		sber.append(id);
+		
 		return result;
 	}
     
-    public static String GenDeleteSQL(Object obj){
-    	String result=null;
+    public static String genDeleteSQL(SQLModel model){
+    	clear();
+    	sber.append("DELETE FROM ");
+		sber.append(model.getTableName());
+		sber.append(" where ");
+		sber.append(model.getCondition());
+		System.out.println(sber);
+    	return sber.toString();
+    }
+    
+    public static String genDeleteSQL(Object obj){
+    	clear();
 		SQLModel model=new SQLModel(obj);
 		
 		sber.append(" DELETE FROM ");
@@ -52,13 +61,13 @@ public class DeleteSQL {
 		}else if(1==ID.getFieldType()){
 			sber.append(ID.getFieldValue()==null?model.getPrimaryFieldValue():ID.getFieldValue());
 		}
-		result=sber.toString();
-		clear();
-		return result;
+		return sber.toString();
 	}
 	
 	private static void clear() {
-        sber.delete(0, sber.length());		
+		if(sber.length()>0){
+            sber.delete(0, sber.length());
+		}
 	}
 	
 }
